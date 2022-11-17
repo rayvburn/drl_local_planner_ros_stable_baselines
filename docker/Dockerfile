@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y \
 # Building catkin_ws
 RUN mkdir -p /usr/catkin_ws/src
 WORKDIR /usr/catkin_ws/src
-RUN git clone https://github.com/RGring/drl_local_planner_ros_stable_baselines
+RUN git clone https://github.com/Steplerchik/drl_local_planner_ros_stable_baselines.git --branch melodic-dev
 RUN cp drl_local_planner_ros_stable_baselines/.rosinstall .
 RUN rosws update
 RUN /bin/bash -c '. /opt/ros/kinetic/setup.bash; cd /usr/catkin_ws; catkin_make'
