@@ -1,0 +1,29 @@
+version: "3.8"
+services:
+    drl_local_planner:
+        image: ${ARCH}melodic/drl_local_planner:${TAG}
+        network_mode: host
+        container_name: drl_local_planner
+        env_file: $ENV_FILE
+        environment:
+            - NVIDIA_DRIVER_CAPABILITIES=all
+            - NVIDIA_VISIBLE_DEVICES=all
+            - DISPLAY=$DISPLAY
+            - QT_X11_NO_MITSHM=1
+            - AGENT_NAME=ppo2_1_raw_data_disc_0_pretrained
+            - NUM_SIM_ENVS=4
+        tty: true
+        privileged: true
+        runtime: nvidia
+        volumes:
+            - type: bind
+              source: ${PRODUCTION_PATH}/../example_agents
+              target: /data/agents
+            - type: bind
+              source: ${PRODUCTION_PATH}/../start_scripts/training_params
+              target: /usr/catkin_ws/src/drl_local_planner_ros_stable_baselines/start_scripts/training_params
+            - type: bind
+              source: /tmp/.X11-unix
+              target: /tmp/.X11-unix
+        command: bash -c "source /opt/ros/melodic/setup.sh;
+                 roscore"

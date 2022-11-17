@@ -1,0 +1,6 @@
+version: "3.8"
+services:
+    drl_local_planner:
+        image: ${ARCH}melodic/drl_local_planner:${TAG}
+        build:
+            context: ${PRODUCTION_PATH}
