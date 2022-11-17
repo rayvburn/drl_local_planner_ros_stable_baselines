@@ -1,6 +1,6 @@
 - git:
     local-name: drl_local_planner_forks/flatland
-    uri: https://github.com/RGring/flatland.git
+    uri: https://github.com/Steplerchik/flatland.git
     version: pedsim_integration
 - git:
     local-name: drl_local_planner_forks/pedsim
