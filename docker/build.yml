@@ -4,3 +4,16 @@ services:
         image: ${ARCH}melodic/drl_local_planner:${TAG}
         build:
             context: ${PRODUCTION_PATH}
+        container_name: drl_local_planner
+        volumes:
+            - type: bind
+              source: ${PRODUCTION_PATH}/../..
+              target: /usr/catkin_ws/src
+        command: bash -c "source /opt/ros/melodic/setup.sh;
+            cd catkin_ws/src;
+            cp drl_local_planner_ros_stable_baselines/.rosinstall .;
+            rosws update;
+            /venv_p3/bin/pip install -e /usr/catkin_ws/src/drl_local_planner_forks/stable-baselines;
+            cd ..;
+            catkin_make;
+            sleep ${POST_BUILD_SLEEP};"
