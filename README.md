@@ -48,17 +48,42 @@ tmuxp load ./docker/scripts/tmuxp/run_dummy_example.yaml
 ```
 
 # Training
+1. In start_scripts/training_params/ppo2_params, define the new agents training parameters. You can find examples of defining params for training from the scratch (pretrained_model_names field is empty) and for training on pretrained models.
 
-1. From the scratch. Set up ./docker/scripts/train.yml. Run the command and wait for a very long time:
+    | Parameter               | Desctiption |
+    |-------------------------|--------------|
+    | agent_name              |  Number of timestamps the agent will be trained.             |
+    | total_timesteps         | Number of timestamps the agent will be trained. |
+    | policy |  see [PPO2 Doc](https://stable-baselines.readthedocs.io/en/master/modules/ppo2.html) |
+    | gamma |  see [PPO2 Doc](https://stable-baselines.readthedocs.io/en/master/modules/ppo2.html) |
+    | n_steps |  see [PPO2 Doc](https://stable-baselines.readthedocs.io/en/master/modules/ppo2.html) |
+    | ent_coef |  see [PPO2 Doc](https://stable-baselines.readthedocs.io/en/master/modules/ppo2.html) |
+    | learning_rate |  see [PPO2 Doc](https://stable-baselines.readthedocs.io/en/master/modules/ppo2.html) |
+    | vf_coef |  see [PPO2 Doc](https://stable-baselines.readthedocs.io/en/master/modules/ppo2.html) |
+    | max_grad_norm |  see [PPO2 Doc](https://stable-baselines.readthedocs.io/en/master/modules/ppo2.html) |
+    | lam |  see [PPO2 Doc](https://stable-baselines.readthedocs.io/en/master/modules/ppo2.html) |
+    | nminibatches |  see [PPO2 Doc](https://stable-baselines.readthedocs.io/en/master/modules/ppo2.html) |
+    | noptepochs |  see [PPO2 Doc](https://stable-baselines.readthedocs.io/en/master/modules/ppo2.html) |
+    | cliprange |  see [PPO2 Doc](https://stable-baselines.readthedocs.io/en/master/modules/ppo2.html) |
+    | robot_radius | The radius if the robot footprint |
+    | rew_func | The reward functions that should be used. They can be found and defined in rl_agent/src/rl_agent/env_utils/reward_container.py. |
+    | num_stacks | State representation includes the current observation and (num_stacks - 1) previous observation. |
+    | stack_offset | The number of timestamps between each stacked observation. |
+    | disc_action_space | 0, if continuous action space. 1, if discrete action space. |
+    | normalize | 0, if input should not be normalized. 1, if input should be normalized. |
+    | stage | stage number of your training. It is supposed to be 0, if you train for the first time. If it is > 0, it loads the agent of the "pretrained_model_path" and continues training. |
+    | pretrained_model_name | If stage > 0 this agent will be loaded and training can be continued. |
+    | task_mode | - "ped" for training on pedestrians only; "static" for training on static objects only; "ped_static" for training on both, static |
+
+2. In docker/train.yml add the desired agent name and the number of simulations in the row:
+```
+ ./entrypoint_ppo2.sh agent_name number_of_simulations
+```
+
+3. Run the command and wait for a very long time:
 ```
 cd <path_to_dir>/drl_local_planner_ros_stable_baselines
 ./docker/scripts/train.sh
-```
-
-2. On pretrained models. It doesn't work for now but it can be fixed. Set up ./docker/scripts/train_pretrained.yml. Run the command and wait for a very long time:
-```
-cd <path_to_dir>/drl_local_planner_ros_stable_baselines
-./docker/scripts/train_pretrained.sh
 ```
 
 # Run trained models
