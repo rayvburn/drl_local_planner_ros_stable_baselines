@@ -76,6 +76,7 @@ do
         # Wait until training is done
         while (screen -list | grep -q "python");
         do
+        screen -wipe
         echo "sleep"
         sleep 5
         done

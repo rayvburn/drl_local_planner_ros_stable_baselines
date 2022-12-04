@@ -85,7 +85,7 @@ def load_train_env(num_envs, robot_radius, rew_fnc, num_stacks, stack_offset, de
         else:
             env_temp = RosEnvContImgVel
 
-    env = SubprocVecEnv([lambda k=k: Monitor(env_temp("sim%d" % (k+1), StateCollector("sim%s"%(k+1), "train") , stack_offset, num_stacks, robot_radius, rew_fnc, debug, "train", task_mode), '%s/%s/sim_%d'%(path_to_models, agent_name, k+1), allow_early_resets=True) for k in range(num_envs)])
+    env = SubprocVecEnv([lambda k=k: Monitor(env_temp("sim%d" % (k+1), StateCollector("sim%s"%(k+1), "train") , stack_offset, num_stacks, robot_radius, rew_fnc, debug, "train", task_mode), '%s/%s/sim_%d'%(path_to_models, agent_name, k+1), allow_early_resets=True) for k in range(num_envs)], 'fork')
 
     # Normalizing?
     if normalize:
@@ -179,7 +179,7 @@ def train_agent_ppo2(config, agent_name, total_timesteps, policy,
     model.learn(total_timesteps=total_timesteps, log_interval=100, callback=train_callback, tb_log_name=agent_name, reset_num_timesteps=reset_num_timesteps)
 
     # Saving final model
-    model.save("%s/%s/%s" % (path_to_models, agent_name, "%s_stage_%d" % (agent_name, stage)))
+    model.save("%s/%s/%s" % (path_to_models, agent_name, "%s_stage_%d" % (agent_name, stage)), True)
     print("Training finished.")
     env.close()
 
