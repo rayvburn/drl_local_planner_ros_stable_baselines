@@ -47,7 +47,7 @@ class Evaluation():
         self.__recent_agent_states = []
 
         # Subscriber for getting data
-        #self.__odom_sub = rospy.Subscriber("%s/odom"%self.__NS, Odometry, self.__odom_callback, queue_size=1)
+        self.__odom_sub = rospy.Subscriber("%s/odom"%self.__NS, Odometry, self.__odom_callback, queue_size=1)
         self.__global_plan_sub = rospy.Subscriber("%s/move_base/NavfnROS/plan"%self.__NS, Path, self.__path_callback, queue_size=1)
         # self.__path_sub = rospy.Subscriber("%s/move_base/GlobalPlanner/plan" % self.__NS, Path, self.__path_callback,  queue_size=1)
         self.__done_sub = rospy.Subscriber("%s/rl_agent/done"%self.__NS, Bool, self.__done_callback, queue_size=1)

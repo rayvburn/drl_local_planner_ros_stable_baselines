@@ -1,3 +1,4 @@
+#! /usr/bin/env python
 '''
     @name:      evaluate_agent.py
     @brief:     Evaluates an agent according to a test set.
@@ -11,7 +12,7 @@ home = os.path.expanduser("~")
 import rospy
 import rospkg
 from multiprocessing import Process
-from scripts.run_scripts.run_ppo import run_ppo
+from run_ppo import run_ppo
 from rl_agent.env_utils.state_collector import StateCollector
 from rl_agent.evaluation.Evaluation import Evaluation
 import time
@@ -27,14 +28,14 @@ def evaluate(ns, sc, evaluation_set_path, save_path):
 
 if __name__ == '__main__':
     task_type = "ped"                       # static, ped
-    complexity = "complex_map_3"            # simple, average, complex
-    no_episodes = 700
+    complexity = "complex_map_1"            # simple, average, complex
+    no_episodes = 100
     ns = "sim1"
     approach = "PPO2"                       # PPO1, PPO2
-    policy = ["CnnPolicy", "CNN1DPolicy_multi_input", "CnnPolicy", "CnnPolicy"]
-    disc_action_space = [False, True, True, True]
-    agent_names = ["ppo2_109", "ppo2_99", "ppo2_107", "ppo2_108"]
-    num_stacks = [1,1,1,3]
+    policy = ["CNN1DPolicy_multi_input"]
+    disc_action_space = [True]
+    agent_names = ["ppo2_1_raw_data_disc_0_by_stepan"]
+    num_stacks = [1]
     stack_offset = 15
 
     rospack = rospkg.RosPack()
@@ -52,7 +53,7 @@ if __name__ == '__main__':
         save_path = "%s/%s_%s" % (path_to_eval_data_test, agent_name, evaluation_set_name)
         sc = StateCollector(ns, "eval")
 
-        p = Process(target=run_ppo, args=(config, sc, approach, agent_name , policy[i] , mode, task_type,
+        p = Process(target=run_ppo, args=(config, sc, agent_name , policy[i] , mode, task_type,
                                           stack_offset, num_stacks[i], True, False, disc_action_space[i], ns))
         p.start()
 

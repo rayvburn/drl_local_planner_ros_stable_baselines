@@ -1,3 +1,4 @@
+#! /usr/bin/env python
 '''
     @name:      save_test_episodes.py
     @brief:     For saving n different episodes. Each episode needs to be rewiewed by the user and the
@@ -11,8 +12,8 @@
     @date:      2019/04/05
 '''
 
-import os
-home = os.path.expanduser("~")
+# import os
+# home = os.path.expanduser("~")
 
 import rospy
 import rospkg
