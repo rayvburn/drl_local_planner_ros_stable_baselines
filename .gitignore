@@ -3,3 +3,6 @@
 *.idea*
 *.pyc
 *screenlog*
+data/
+example_agents/
+
