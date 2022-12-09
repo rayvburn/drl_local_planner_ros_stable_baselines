@@ -7,9 +7,9 @@ properties:
   # physics solver
   position_iterations: 10
 layers:  # Support for arbitrary number of layers
-  - name: "ped"
-    color: [0, 1, 0, 0]  # List of floats [r,g,b,a] to color debug boundary
   - name: "static"
     map: "map.yaml"  # leading / denotes absolute file path, otherwise relative
+    color: [0, 1, 0, 0]  # List of floats [r,g,b,a] to color debug boundary
+  - name: "ped"
     color: [0, 1, 0, 0]  # List of floats [r,g,b,a] to color debug boundary
   
