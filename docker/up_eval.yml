@@ -21,10 +21,7 @@ services:
               source: ${PRODUCTION_PATH}/../data
               target: /data
             - type: bind
-              source: ${PRODUCTION_PATH}/../start_scripts/training_params
-              target: /usr/catkin_ws/src/drl_local_planner_ros_stable_baselines/start_scripts/training_params
-            - type: bind
               source: /tmp/.X11-unix
               target: /tmp/.X11-unix
-        command: bash -c "cd catkin_ws/src/drl_local_planner_ros_stable_baselines/start_scripts;
-                 ./entrypoint_ppo2.sh ppo2_1_raw_data_disc_0_by_stepan 4"
+        command: bash -c "source /opt/ros/melodic/setup.sh;
+                 roscore"

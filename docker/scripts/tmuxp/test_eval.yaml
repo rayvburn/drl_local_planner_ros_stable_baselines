@@ -1,0 +1,29 @@
+session_name: RUN_DUMMY_EXAMPLE
+suppress_history: false
+start_directory: ../
+global_options:
+  default-shell: /bin/bash
+  default-command: /bin/bash
+environment:
+  EDITOR: /bin/nano
+windows:
+- window_name: run_dummy_example
+  focus: true
+  layout: tiled
+  panes:
+    - shell_command:
+      - xhost +
+      - ./up_eval.sh
+    - shell_command:
+      - sleep 5
+      - ./into.sh
+      - roslaunch rl_bringup rviz.launch ns:="sim1"
+    - shell_command:
+      - sleep 5
+      - ./into.sh
+      - roslaunch rl_bringup setup.launch ns:="sim1" rl_params:="rl_params_scan"
+    - shell_command:
+      - sleep 5
+      - ./into.sh
+      - source /venv_p3/bin/activate 
+      - roslaunch rl_agent test_eval.launch
