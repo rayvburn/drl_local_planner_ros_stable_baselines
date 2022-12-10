@@ -1,4 +1,4 @@
-session_name: RUN_DUMMY_EXAMPLE
+session_name: EVALUATION_AGENTS
 suppress_history: false
 start_directory: ../
 global_options:
@@ -7,13 +7,13 @@ global_options:
 environment:
   EDITOR: /bin/nano
 windows:
-- window_name: run_dummy_example
+- window_name: evaluation_agents
   focus: true
   layout: tiled
   panes:
     - shell_command:
       - xhost +
-      - ./up.sh
+      - ./up_eval.sh
     - shell_command:
       - sleep 5
       - ./into.sh
@@ -23,7 +23,7 @@ windows:
       - ./into.sh
       - roslaunch rl_bringup setup.launch ns:="sim1" rl_params:="rl_params_scan"
     - shell_command:
-      - sleep 5
+      - sleep 10
       - ./into.sh
       - source /venv_p3/bin/activate 
-      - roslaunch rl_agent test.launch mode:="train"
+      - rosrun rl_agent evaluate_agent.py  

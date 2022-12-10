@@ -108,3 +108,45 @@ tmuxp load ./docker/scripts/tmuxp/run_1_raw_disc.yaml
 cd <path_to_dir>/drl_local_planner_ros_stable_baselines
 tmuxp load ./docker/scripts/tmuxp/run_3_raw_disc.yaml
 ```
+
+
+# Evaluate the model
+
+In order to evaluate the trained agents, we need to create a set of testing episodes (evaluation set). You can do it by your own or just use prepared [set of episodes](https://drive.google.com/file/d/1y55HICHJX0UHzf1S93DATuSkeqNUDSwA/view?usp=share_link). It consists of 205 episodes, so if you will create different number of episodes, the changes in the code is required:
+```
+no_episodes = 205
+``` 
+
+The obtained file should be found in `data/evaluation_data/evaluation_sets` folder
+
+1.  Launch the saving testing set of episodes (not neccesary)
+```
+cd <path_to_dir>/drl_local_planner_ros_stable_baselines
+tmuxp load ./docker/scripts/tmuxp/save_episodes.yaml
+```
+
+2. Launch the evaluation script
+```
+cd <path_to_dir>/drl_local_planner_ros_stable_baselines
+tmuxp load ./docker/scripts/tmuxp/evaluation.yaml
+```
+
+3. Launch the analysis of the agent(s)
+```
+cd <path_to_dir>/drl_local_planner_ros_stable_baselines
+tmuxp load ./docker/scripts/tmuxp/analysis_agents.yaml
+```
+
+In order to check the results of the agents performance:
+1. open the browser
+2. go to `http://localhost:6006/`
+3. see the results of the trained agents by their names
+
+
+### Additional comments
+
+In order to evaluate new trained agent:
+1. change the name of the agent in the list of agent_names in `rl_agent/scripts/evaluate_agent.py:37` and `rl_agent/scripts/analysis.py:95`:
+```
+agent_names = ["ppo2_1_raw_data_disc_0_by_stepan"]
+``` 

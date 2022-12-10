@@ -29,7 +29,7 @@ def evaluate(ns, sc, evaluation_set_path, save_path):
 if __name__ == '__main__':
     task_type = "ped"                       # static, ped
     complexity = "complex_map_1"            # simple, average, complex
-    no_episodes = 100
+    no_episodes = 205
     ns = "sim1"
     approach = "PPO2"                       # PPO1, PPO2
     policy = ["CNN1DPolicy_multi_input"]

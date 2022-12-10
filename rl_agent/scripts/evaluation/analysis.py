@@ -12,9 +12,10 @@ import rospkg
 from rl_agent.evaluation.Analysis_eval import Analysis
 import pickle
 import configparser
+import tensorflow as tf
 
 
-def analyse(complexity, evaluation_file_path, reward_file_path, save_path):
+def analyse(complexity, evaluation_file_path, reward_file_path, save_path, logger):
     analysis = Analysis()
     results = analysis.load_results(evaluation_file_path)
     print("loaded data: %s"%evaluation_file_path)
@@ -23,8 +24,11 @@ def analyse(complexity, evaluation_file_path, reward_file_path, save_path):
     # timesteps = analysis.reconstruct_timestep_array(timesteps)
     success, time_exceeded, collision = analysis.get_scores(results)
 
-
+    print(f'LEN OF SUCCESS: {len(success)}')
     if (complexity == "train"):
+        for i in range(len(success)):
+            summary = tf.Summary(value=[tf.Summary.Value(tag='success', simple_value=success[i])])
+            logger.add_summary(summary, i)
         [timesteps_tb, reward] = analysis.get_reward(reward_file_path)
     else:
         perc_success_drive = analysis.get_percentual_success_drive(results)
@@ -39,7 +43,25 @@ def analyse(complexity, evaluation_file_path, reward_file_path, save_path):
 
         cum_heading_changes = analysis.get_heading_changes(results, False)
 
-        avg_heading_changes = analysis.get_heading_changes(results, True)
+        avg_heading_changes = analysis.get_heading_changes(results, False)
+
+        for i in range(len(success)):
+            summary = tf.Summary(value=[tf.Summary.Value(tag='success', simple_value=success[i])])
+            logger.add_summary(summary, i)
+            summary = tf.Summary(value=[tf.Summary.Value(tag='success_drive_percent', simple_value=perc_success_drive[i])])
+            logger.add_summary(summary, i)
+            summary = tf.Summary(value=[tf.Summary.Value(tag='path_ratio', simple_value=path_ratio[i])])
+            logger.add_summary(summary, i)
+            summary = tf.Summary(value=[tf.Summary.Value(tag='speed', simple_value=speed[i])])
+            logger.add_summary(summary, i)
+            summary = tf.Summary(value=[tf.Summary.Value(tag='min_pedestrian_distance', simple_value=min_ped_dist[i])])
+            logger.add_summary(summary, i)
+            summary = tf.Summary(value=[tf.Summary.Value(tag='average_pedestrian_distance', simple_value=avg_ped_dist[i])])
+            logger.add_summary(summary, i)
+            summary = tf.Summary(value=[tf.Summary.Value(tag='cummulative_heading_changes', simple_value=cum_heading_changes[i])])
+            logger.add_summary(summary, i)
+            summary = tf.Summary(value=[tf.Summary.Value(tag='average_heading_changes', simple_value=avg_heading_changes[i])])
+            logger.add_summary(summary, i)
 
     print("saving results...")
 
@@ -69,7 +91,7 @@ def analyse(complexity, evaluation_file_path, reward_file_path, save_path):
 if __name__ == '__main__':
     complexity = "complex_map_1"    # train, simple, average, complex, follow_path,
     task_type = "ped"               # static or ped
-    no_episodes = 100
+    no_episodes = 205
     agent_names = ["ppo2_1_raw_data_disc_0_by_stepan"]
 
 
@@ -79,6 +101,10 @@ if __name__ == '__main__':
     config.read('%s/config/path_config.ini' % rl_bringup_path)
     path_to_eval_data_train = config['PATHES']['path_to_eval_data_train']
     path_to_eval_data_test = config['PATHES']['path_to_eval_data_test']
+    path_to_tensorboard_log = config['PATHES']['path_to_tensorboard_log']
+
+    analysis_path = os.path.join(path_to_tensorboard_log, f'analysis_{agent_names[0]}')
+    analysis_logger = tf.summary.FileWriter(analysis_path)
 
 
 
@@ -101,5 +127,5 @@ if __name__ == '__main__':
             save_path = "%s/%s_%s_analysis_eval_set_%s_%s" % (
                 path_to_eval_data_test, agent_name, task_type, complexity, no_episodes)
 
-        analyse(complexity, evaluation_file_path, reward_file_path, save_path)
+        analyse(complexity, evaluation_file_path, reward_file_path, save_path, analysis_logger)
 
