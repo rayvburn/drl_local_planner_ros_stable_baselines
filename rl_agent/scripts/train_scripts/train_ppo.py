@@ -189,7 +189,7 @@ def evaluate_during_training(ns, save_path, robot_radius):
     eval.evaluate_training(save_path)
 
 if __name__ == '__main__':
-    record_evaluation_data = False
+    record_evaluation_data = True
 
     rospack = rospkg.RosPack()
     rl_bringup_path = rospack.get_path('rl_bringup')
