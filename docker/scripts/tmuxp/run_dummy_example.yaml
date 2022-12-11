@@ -27,3 +27,7 @@ windows:
       - ./into.sh
       - source /venv_p3/bin/activate 
       - roslaunch rl_agent run_ppo_agent.launch mode:="train"
+    - shell_command:
+      - sleep 5
+      - ./into.sh
+      - source /venv_p3/bin/activate

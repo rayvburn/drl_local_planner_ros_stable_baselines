@@ -3,6 +3,8 @@
 *.idea*
 *.pyc
 *screenlog*
+*.csv
+*.pkl
 data/
 example_agents/
 

@@ -14,9 +14,11 @@ from rl_agent.env_utils.task_generator import TaskGenerator
 from nav_msgs.msg import Odometry, Path
 from sensor_msgs.msg import LaserScan
 from std_msgs.msg import Bool
+from datetime import datetime
 import pickle
 import time
 import math
+import os
 from geometry_msgs.msg import PoseStamped, Twist, Point
 from flatland_msgs.msg import DebugTopicList
 from rosgraph_msgs.msg import Clock
@@ -103,6 +105,8 @@ class Evaluation():
 
         """
         result = {}
+        result['time_exceeded'] = 0
+        result['success'] = None
         if not train:
             result["global_path"] = self.__path
             result["agent_states"] = []
@@ -144,9 +148,18 @@ class Evaluation():
                 rospy.loginfo("Time exceeded.")
                 done = True
                 result["success"] = 0
+                result['time_exceeded'] = 1
             if (not train):
                 result["agent_states"].append(self.__recent_agent_states)
-            self.__sleep(0.1)
+            self.__sleep(0.05)
+            if train:
+                if not rospy.get_param("/is_training"):
+                    print('break the loop')
+                    done = True
+            # if max_timesteps is not None:
+            #     if self.__timestep >= max_timesteps:
+            #         print('break the loop')
+            #         done = True
 
         # Info that we don't want to capture during training
         if not train:
@@ -187,19 +200,57 @@ class Evaluation():
         Evaluates an agent during training. Results are saved in <evaluation_data_path>/evaluation_data/train
         :param agent_name: name of the agent (.pkl)
         """
+        results = {
+            'success': [],
+            'timestep': [],
+            'time_exceeded': []
+        }
+        is_training = rospy.get_param("/is_training")
+        rospy.set_param('/is_saved_eval', False)
+        print(f'IS TRAINING: type: {type(is_training)} -- value: {is_training}')
 
-        while True:
+        # path = '%s.pickle' % (save_path)
+        # print(f'path: {path}')
+
+        # if os.path.exists(path):
+        #     with open(path, 'rb') as f:
+        #         results = pickle.load(f)
+
+        while is_training:
+            # print(f'IS TRAINING: {is_training}')
             self.__timestep -= 1
 
             #Waiting for new task
             while not self.__new_task_started:
                 time.sleep(0.001)
+            print(f'in training: {rospy.get_param("/is_training")}')
             self.__done = False
             self.__new_task_started = False
             result = self.evaluate_episode(True)
-            with open('%s.pickle' % (save_path), 'ab') as handle:
-                pickle.dump(result, handle, protocol=pickle.HIGHEST_PROTOCOL)
+            print(f"----- TIMESTEP: {result['timestep']} // SUCCESS: {result['success']} --------------")
+            if result['success'] is not None:
+                # results['timestep'].append(result['timestep'])
+                # results['success'].append(result['success'])
+                # results['time_exceeded'].append(result['time_exceeded'])
+                results['timestep'].extend([result['timestep']])
+                results['success'].extend([result['success']])
+                results['time_exceeded'].extend([result['time_exceeded']])
 
+            print(f'len of results: {len(results["success"])}')
+            is_training = rospy.get_param("/is_training")
+
+        print('saving results')
+
+        splitted = save_path.split('/')
+        name_agent = splitted[-1]
+        path_dir = '/'.join(splitted[:-1])
+        now = datetime.now().strftime("_%dDec_%H:%M.pickle")
+        new_path = os.path.join(path_dir, name_agent + now)
+        
+        with open(new_path, 'wb') as handle:
+            pickle.dump(results, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        print('saved')
+        rospy.set_param('/is_saved_eval', True)
 
     def show_paths(self, result):
         """

@@ -29,13 +29,13 @@ def evaluate(ns, sc, evaluation_set_path, save_path):
 if __name__ == '__main__':
     task_type = "ped"                       # static, ped
     complexity = "complex_map_1"            # simple, average, complex
-    no_episodes = 100
+    no_episodes = 101
     ns = "sim1"
     approach = "PPO2"                       # PPO1, PPO2
     policy = ["CNN1DPolicy_multi_input"]
     disc_action_space = [True]
-    agent_names = ["ppo2_1_raw_data_disc_0_by_stepan"]
-    num_stacks = [1]
+    agent_names = ["test"]
+    num_stacks = [3]
     stack_offset = 15
 
     rospack = rospkg.RosPack()
