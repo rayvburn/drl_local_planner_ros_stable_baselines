@@ -1,0 +1,26 @@
+session_name: TEST_ENV
+suppress_history: false
+start_directory: ../
+global_options:
+  default-shell: /bin/bash
+  default-command: /bin/bash
+environment:
+  EDITOR: /bin/nano
+windows:
+- window_name: test_env
+  focus: true
+  layout: tiled
+  panes:
+    - shell_command:
+      - xhost +
+      - ./up.sh
+    - shell_command:
+      - sleep 5
+      - ./into.sh
+    - shell_command:
+      - sleep 5
+      - ./into.sh
+    - shell_command:
+      - sleep 6
+      - ./into.sh
+      - source /venv_p3/bin/activate 

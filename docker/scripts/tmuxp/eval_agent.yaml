@@ -1,0 +1,29 @@
+session_name: EVAL_AGENT
+suppress_history: false
+start_directory: ../
+global_options:
+  default-shell: /bin/bash
+  default-command: /bin/bash
+environment:
+  EDITOR: /bin/nano
+windows:
+- window_name: eval_agent
+  focus: true
+  layout: tiled
+  panes:
+    - shell_command:
+      - xhost +
+      - ./up.sh
+    - shell_command:
+      - sleep 5
+      - ./into.sh
+      - roslaunch rl_bringup rviz.launch ns:="sim1"
+    - shell_command:
+      - sleep 5
+      - ./into.sh
+      - roslaunch rl_bringup setup.launch ns:="sim1" rl_params:="rl_params_scan"
+    - shell_command:
+      - sleep 6
+      - ./into.sh
+      - source /venv_p3/bin/activate 
+      - python catkin_ws/src/drl_local_planner_ros_stable_baselines/rl_agent/scripts/train_scripts/train_ppo.py

@@ -1,0 +1,37 @@
+session_name: TRAIN_DUMMY_EXAMPLE
+suppress_history: false
+start_directory: ../
+global_options:
+  default-shell: /bin/bash
+  default-command: /bin/bash
+environment:
+  EDITOR: /bin/nano
+windows:
+- window_name: train_dummy_example
+  focus: true
+  layout: tiled
+  panes:
+    - shell_command:
+      - xhost +
+      - ./up_eval.sh
+    - shell_command:
+      - sleep 5
+      - ./into.sh
+      - roslaunch rl_bringup rviz.launch ns:="sim1"
+    - shell_command:
+      - sleep 5
+      - ./into.sh
+      - roslaunch rl_bringup setup.launch ns:="sim1" rl_params:="rl_params_scan"
+    - shell_command:
+      - sleep 8
+      - ./into.sh
+      - source /venv_p3/bin/activate 
+      - python catkin_ws/src/drl_local_planner_ros_stable_baselines/rl_agent/scripts/train_scripts/train_ppo.py
+    - shell_command:
+      - sleep 10
+      - ./into.sh
+      - watch -n 0.01 rosparam get /is_training
+    - shell_command:
+      - sleep 10
+      - ./into.sh
+      - watch -n 0.01 rosparam get /is_saved_eval

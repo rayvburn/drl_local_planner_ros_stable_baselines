@@ -1,0 +1,40 @@
+session_name: TRAIN_FROM_CSV
+suppress_history: false
+start_directory: ../
+global_options:
+  default-shell: /bin/bash
+  default-command: /bin/bash
+environment:
+  EDITOR: /bin/nano
+windows:
+- window_name: train_from_csv
+  focus: true
+  layout: tiled
+  panes:
+    - shell_command:
+      - xhost +
+      - ./up_eval.sh
+    - shell_command:
+      - sleep 5
+      - ./into.sh
+      - roslaunch rl_bringup rviz.launch ns:="sim1"
+    - shell_command:
+      - sleep 5
+      - ./into.sh
+      - roslaunch rl_bringup setup.launch ns:="sim1" rl_params:="rl_params_scan"
+    - shell_command:
+      - sleep 8
+      - ./into.sh
+      - source /venv_p3/bin/activate 
+      - python catkin_ws/src/drl_local_planner_ros_stable_baselines/rl_agent/scripts/train_scripts/train_ppo.py test 10000 CNN1DPolicy_multi_input 0.99 4800 0.005 0.0003 0.2 0.46 0.95 15 3 0.2 0.5 19 3 15 1 0 0 "" ped 1
+    - shell_command:
+      # - conda acttivate ds
+      - tensorboard --logdir ../../data/path_to_tensorboard_log_train
+    # - shell_command:
+    #   - sleep 10
+    #   - ./into.sh
+    #   - watch -n 0.01 rosparam get /is_training
+    # - shell_command:
+    #   - sleep 10
+    #   - ./into.sh
+    #   - watch -n 0.01 rosparam get /is_saved_eval

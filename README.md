@@ -5,169 +5,50 @@
 * Link to [IROS Paper](http://ras.papercept.net/images/temp/IROS/files/0122.pdf)
 * Link to [Master Thesis](https://tams.informatik.uni-hamburg.de/publications/2019/MSc_Ronja_Gueldenring.pdf) for more in depth information.
 
-# Installation (Else: Docker below)
+# Prerequisites
+- [docker](https://docs.docker.com/engine/install/ubuntu/)
+- [docker-compose](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-compose-on-ubuntu-20-04)
+- [nvidia-docker2](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html)
+- tmux
+- tmuxp
 
-1. Standart ROS setup (Code has been tested with ROS-kinetic on Ubuntu 16.04)
+# Installation (Docker only)
 
-2. Install additional packages
-    ```
-    apt-get update && apt-get install -y \
-    libqt4-dev \
-    libopencv-dev \
-    liblua5.2-dev \
-    virtualenv \
-    screen \
-    python3-dev \
-    ros-kinetic-tf2-geometry-msgs \
-    ros-kinetic-navigation \
-    ros-kinetic-rviz 
-    ```
+Installation is performed via docker-compose. All corresponding files you can find in 'docker' folder.
 
-3. Setup repository: 
-    * Clone this repository in your src-folder of your catkin workspace
-    ```
-    cd <path_to_catkin_ws>/src/drl_local_planner_ros_stable_baselines
-    cp .rosinstall ../
-    cd ..
-    rosws update
-    cd <path_to_catkin_ws>
-    catkin_make -DCMAKE_BUILD_TYPE=Release
-    ```
-    (please install missing packages)
+For installation run the following commands in the terminal:
+```
+# In terminal 1:
 
-4. Setup virtual environment to be able to use python3 with ros (consider also requirements.txt)
-   ```
-    virtualenv <path_to_venv>/venv_p3 --python=python3
-    source <path_to_venv>/venv_p3/bin/activate
-    <path_to_venv>/venv_p3/bin/pip install \
-        pyyaml \
-        rospkg \
-        catkin_pkg \
-        exception \
-        numpy \
-        tensorflow=="1.13.1" \
-        gym \
-        pyquaternion \ 
-        mpi4py \
-        matplotlib
-    cd <path_to_catkin_ws>/src/drl_local_planner_forks/stable_baselines/
-    <path_to_venv>/venv_p3/bin/pip install -e path_to_catkin_ws>/src/drl_local_planner_forks/stable-baselines/
-    ```
-5. Set system-relevant variables 
-    * Modify all relevant pathes rl_bringup/config/path_config.ini
+cd <path_to_dir>/drl_local_planner_ros_stable_baselines
+./docker/scripts/build.sh
 
+# In terminal 2 (when the build in the 1st terminal is done and hanging):
+
+./docker/scripts/save_build.sh
+
+# Stop Terminal 1
+```
 
 # Example usage
 
 1. Train agent
-    * Open first terminal (roscore): 
-    ```
-    roscore
-    ```
-    * Open second terminal (simulationI:
-    ```
-    roslaunch rl_bringup setup.launch ns:="sim1" rl_params:="rl_params_scan"
-    ```
-    * Open third terminal (DRL-agent):
-     ```
-    source <path_to_venv>/bin/activate 
-    python rl_agent/scripts/train_scripts/train_ppo.py
-    ```
-    * Open fourth terminal (Visualization):
-     ```
-    roslaunch rl_bringup rviz.launch ns:="sim1"
-    ```
+
+Run the command in the terminal:
+```
+cd <path_to_dir>/drl_local_planner_ros_stable_baselines
+tmuxp load ./docker/scripts/tmuxp/train_dummy_example.yaml
+
+```
 
 2. Execute self-trained ppo-agent
-    * Copy your trained agent in your "path_to_models"
-    * Open first terminal: 
-    ```
-    roscore
-    ```
-    * Open second terminal: 
-    ```
-    roslaunch rl_bringup setup.launch ns:="sim1" rl_params:="rl_params_scan"
-    ```
-    * Open third terminal:
-    ```
-    source <path_to_venv>/venv_p3/bin/activate 
-    roslaunch rl_agent run_ppo_agent.launch mode:="train"
-    ```
-    * Open fourth terminal: 
-    ```
-    roslaunch rl_bringup rviz.launch ns:="sim1"
-    ```
-    * Set 2D Navigation Goal in rviz
-
-# Run pretrained Agents
-Note: To be able to load the pretrained agents, you need to install numpy version 1.17.0.
 ```
-<path_to_venv>/venv_p3/bin/pip install numpy==1.17
+cd <path_to_dir>/drl_local_planner_ros_stable_baselines
+tmuxp load ./docker/scripts/tmuxp/run_dummy_example.yaml
 ```
 
-### Run agent trained on raw data, discrete action space, stack size 1
-1. Copy the example_agents in your "path_to_models"
-2. Open first terminal: 
-    ```
-    roscore
-    ```
-3. Open second terminal for visualization: 
-    ```
-    roslaunch rl_bringup rviz.launch ns:="sim1"
-    ```
-4. Open third terminal: 
-    ```
-    roslaunch rl_bringup setup.launch ns:="sim1" rl_params:="rl_params_scan"
-    ```
-5. Open fourth terminal:
-    ```
-    source <path_to_venv>/venv_p3/bin/activate 
-    roslaunch rl_agent run_1_raw_disc.launch mode:="train"
-    ```
-### Run agent trained on raw data, discrete action space, stack size 3
-1. Step 1 - 4 are the same like in the first example
-2. Open fourth terminal:
-    ```
-    source <path_to_venv>/venv_p3/bin/activate 
-    roslaunch rl_agent run_3_raw_disc.launch mode:="train"
-    ```
-
-### Run agent trained on raw data, continuous action space, stack size 1
-1. Step 1 - 4 are the same like in the first example
-2. Open fourth terminal:
-    ```
-    source <path_to_venv>/venv_p3/bin/activate 
-    roslaunch rl_agent run_1_raw_cont.launch mode:="train"
-    ```
-
-### Run agent trained on image data, discrete action space, stack size 1
-1. Step 1 - 3 are the same like in the first example
-4. Open third terminal: 
-    ```
-    roslaunch rl_bringup setup.launch ns:="sim1" rl_params:="rl_params_img"
-    ```
-5. Open fourth terminal:
-    ```
-    source <path_to_venv>/venv_p3/bin/activate 
-    roslaunch rl_agent run_1_img_disc.launch mode:="train"
-    ```
-
-
-    
-
-
-# Training in Docker
-I set up a docker image, that allows you to train a DRL-agent in parallel simulation environments. Furthermore, it simplifies the deployment on a server. Using docker you don't need to follow the steps in the Installation section.
-
-0. Build the Docker image (This will unfortunately take about 15 minutes):
-```
-cd drl_local_planner_ros_stable_baselines/docker
-```
-```
-docker build -t ros-drl_local_planner .
-```
-## Training from scratch
-1. In start_scripts/training_params/ppo2_params, define the agents training parameters.
+# Training
+1. In start_scripts/training_params/ppo2_params, define the new agents training parameters. You can find examples of defining params for training from the scratch (pretrained_model_names field is empty) and for training on pretrained models.
 
     | Parameter               | Desctiption |
     |-------------------------|--------------|
@@ -194,63 +75,87 @@ docker build -t ros-drl_local_planner .
     | pretrained_model_name | If stage > 0 this agent will be loaded and training can be continued. |
     | task_mode | - "ped" for training on pedestrians only; "static" for training on static objects only; "ped_static" for training on both, static |
 
+2. In docker/train.yml add the desired agent name and the number of simulations in the row:
+```
+ ./entrypoint_ppo2.sh agent_name number_of_simulations
+```
+
+3. Run the command and wait for a very long time:
+```
+cd <path_to_dir>/drl_local_planner_ros_stable_baselines
+./docker/scripts/train.sh
+```
+
+I have got some unexpected errors on that part, therefore, I have created the tmuxp conf in order to check if the model is really training:
+```
+cd <path_to_dir>/drl_local_planner_ros_stable_baselines
+tmuxp load ./docker/scripts/tmuxp/train_from_csv.yaml
+```
+Just put there all parameters from the csv and the number of simulators should be equal to 1.
 
 
-2. There are some predefined agents. As example I will use the ppo2_1_raw_data_disc_0 in the training session.
+# Run trained models
 
-    ```
-    docker run --rm -d \
-        -v <folder_to_save_data>:/data \
-        -v drl_local_planner_ros_stable_baselines/start_scripts/training_params:/usr/catkin_ws/src/drl_local_planner_ros_stable_baselines/start_scripts/training_params \
-        -e AGENT_NAME=ppo2_1_raw_data_disc_0 \
-        -e NUM_SIM_ENVS=4 \
-        ros-drl_local_planner
-    ```
+If you want a good(real) visualization, change the param:
 
-3. If you want to display the training in Rviz, run the docker container in the hosts network. In order to use rviz, the relevant packages need to be compiled on your machine.
-    ```
-    docker run --rm -d \
-        -v <folder_to_save_data>:/data \
-        -v drl_local_planner_ros_stable_baselines/start_scripts/training_params:/usr/catkin_ws/src/drl_local_planner_ros_stable_baselines/start_scripts/training_params \
-        -e AGENT_NAME=ppo2_1_raw_data_disc_0 \
-        -e NUM_SIM_ENVS=4 \
-        --net=host \
-        ros-drl_local_planner
-    ```
-    Now you can display the different simulation environments:
-    * Simulation 1:
-        ```
-        roslaunch rl_bringup rviz.launch ns:="sim1"
-        ```
-    * Simulation 2:
-        ```
-        roslaunch rl_bringup rviz.launch ns:="sim2"
-        ```
-    * etc. ...
+<path_to_dir>/drl_local_planner_ros_stable_baselines/rl_bringup/config/rl_common.yaml:
+```
+train_mode: 2
+```
 
-## Train with pre-trained agents
-### Run agent trained on raw data, discrete action space, stack size 1
-    ```
-    docker run --rm -d \
-        -v drl_local_planner_ros_stable_baselines/example_agents:/data/agents \
-        -v drl_local_planner_ros_stable_baselines/start_scripts/training_params:/usr/catkin_ws/src/drl_local_planner_ros_stable_baselines/start_scripts/training_params \
-        -e AGENT_NAME=ppo2_1_raw_data_disc_0_pretrained \
-        -e NUM_SIM_ENVS=4 \
-        --net=host \
-        ros-drl_local_planner
-    ```
-### Run agent trained on image data, discrete action space, stack size 1
-    ```
-    docker run --rm -d \
-        -v drl_local_planner_ros_stable_baselines/example_agents:/data/agents \
-        -v drl_local_planner_ros_stable_baselines/start_scripts/training_params:/usr/catkin_ws/src/drl_local_planner_ros_stable_baselines/start_scripts/training_params \
-        -e AGENT_NAME=ppo2_1_img_disc_1_pretrained \
-        -e NUM_SIM_ENVS=4 \
-        --net=host \
-        ros-drl_local_planner
-    ```
+After running, you can send 2D Nav Goal in RVIZ to create the global path for the robot to follow.
+
+1. 1 raw disc:
+```
+cd <path_to_dir>/drl_local_planner_ros_stable_baselines
+tmuxp load ./docker/scripts/tmuxp/run_1_raw_disc.yaml
+```
+
+2. 3 raw disc:
+```
+cd <path_to_dir>/drl_local_planner_ros_stable_baselines
+tmuxp load ./docker/scripts/tmuxp/run_3_raw_disc.yaml
+```
 
 
+# Evaluate the model
 
-    
-    
+In order to evaluate the trained agents, we need to create a set of testing episodes (evaluation set). You can do it by your own or just use prepared [set of episodes](https://drive.google.com/file/d/1y55HICHJX0UHzf1S93DATuSkeqNUDSwA/view?usp=share_link). It consists of 205 episodes, so if you will create different number of episodes, the changes in the code is required:
+```
+no_episodes = 205
+``` 
+
+The obtained file should be found in `data/evaluation_data/evaluation_sets` folder
+
+1.  Launch the saving testing set of episodes (not neccesary)
+```
+cd <path_to_dir>/drl_local_planner_ros_stable_baselines
+tmuxp load ./docker/scripts/tmuxp/save_episodes.yaml
+```
+
+2. Launch the evaluation script
+```
+cd <path_to_dir>/drl_local_planner_ros_stable_baselines
+tmuxp load ./docker/scripts/tmuxp/evaluation.yaml
+```
+ps. check number of stack before launching, it should be correlated to the model trained. `num_stacks` in `rl_agent/scripts/evaluate_agent.py:38` 
+
+3. Launch the analysis of the agent(s)
+```
+cd <path_to_dir>/drl_local_planner_ros_stable_baselines
+tmuxp load ./docker/scripts/tmuxp/analysis_agents.yaml
+```
+
+In order to check the results of the agents performance:
+1. open the browser
+2. go to `http://localhost:6006/`
+3. see the results of the trained agents by their names
+
+
+### Additional comments
+
+In order to evaluate new trained agent:
+1. change the name of the agent in the list of agent_names in `rl_agent/scripts/evaluate_agent.py:37` and `rl_agent/scripts/analysis.py:95`:
+```
+agent_names = ["test"]
+``` 

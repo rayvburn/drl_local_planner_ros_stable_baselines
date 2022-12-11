@@ -35,10 +35,6 @@ Panels:
     Name: Time
     SyncMode: 0
     SyncSource: static_laser
-  - Class: rviz_plugin/Teleop
-    Name: Teleop
-  - Class: rviz_plugin/Teleop
-    Name: Teleop
 Toolbars:
   toolButtonStyle: 2
 Visualization Manager:

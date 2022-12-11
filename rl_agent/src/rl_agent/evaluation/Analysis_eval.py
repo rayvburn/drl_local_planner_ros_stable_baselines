@@ -10,6 +10,7 @@ import rospkg
 import pickle
 import math
 import csv
+import numpy as np
 
 class Analysis():
     def __init__(self):
@@ -220,3 +221,89 @@ class Analysis():
         return path_length
 
 
+    def get_min_ped_dist(self, results):
+        """
+        Computes the min distance from the driven path to pedestrians
+        :param results: list of n results
+        :return  list of min distances
+        """
+        _min_ped_dist_vec = []
+        for result in results:
+            if len(result["driven_path"].poses) == 0:
+                continue
+            robot_poses = result["driven_path"].poses
+            ped_states = result["agent_states"]
+            min_dist = 100000
+            for i in range(len(robot_poses)):
+                robot_pose = robot_poses[i].pose.position
+                for ped_state in ped_states[i]:
+                    ped_pose = ped_state.pose.position
+                    dist = self.__mean_square_dist((ped_pose.x - robot_pose.x), (ped_pose.y - robot_pose.y))
+                    if dist < min_dist:
+                        min_dist = dist
+            _min_ped_dist_vec.append(min_dist)
+        return _min_ped_dist_vec
+
+    def get_avg_ped_dist(self, results):
+        """
+        Computes the avg distance from the driven path to pedestrians
+        :param results: list of n results
+        :return  list of avg distances
+        """
+        _avg_ped_dist_vec = []
+        for result in results:
+            if len(result["driven_path"].poses) == 0:
+                continue
+            robot_poses = result["driven_path"].poses
+            ped_states = result["agent_states"]
+            dist = 0
+            count = 0
+            for i in range(len(robot_poses)):
+                robot_pose = robot_poses[i].pose.position
+                for ped_state in ped_states[i]:
+                    ped_pose = ped_state.pose.position
+                    dist += self.__mean_square_dist((ped_pose.x - robot_pose.x), (ped_pose.y - robot_pose.y))
+                    count += 1
+            _avg_ped_dist_vec.append(dist / count)
+        return _avg_ped_dist_vec
+
+
+    def get_heading_changes(self, results, do_avg):
+        """
+        Computes the avg heading changes of the driven path
+        :param results: list of n results
+        :return  list of avg heading changes
+        """
+        _avg_heading_changes_vec = []
+        for result in results:
+            if len(result["driven_path"].poses) == 0:
+                continue
+            robot_poses = result["driven_path"].poses
+            heading_changes = 0
+            for i in range(len(robot_poses) - 1):
+                heading_changes += self.__heading_change(robot_poses[i].pose, robot_poses[i + 1].pose)
+            
+            if (do_avg):
+                heading_changes /= len(robot_poses) - 1
+
+            _avg_heading_changes_vec.append(heading_changes)
+        return _avg_heading_changes_vec
+
+    def __get_yaw(self, orientation):
+        # q = (
+        #     orientation.x,
+        #     orientation.y,
+        #     orientation.z,
+        #     orientation.w)
+        # _, _, yaw = tf_conversions.transformations.euler_from_quaternion(q)
+
+        t3 = +2.0 * (orientation.w * orientation.z + orientation.x * orientation.y)
+        t4 = +1.0 - 2.0 * (orientation.y * orientation.y + orientation.z * orientation.z)
+        yaw_z = math.atan2(t3, t4)
+        return yaw_z
+
+    def __heading_change(self, pose1, pose2):
+        yaw1 = self.__get_yaw(pose1.orientation)
+        yaw2 = self.__get_yaw(pose2.orientation)
+        local_yaw = (yaw1 + yaw2 + np.pi) % (2 * np.pi) - np.pi
+        return abs(local_yaw)
