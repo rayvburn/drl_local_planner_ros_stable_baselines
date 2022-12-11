@@ -1,4 +1,4 @@
-session_name: TRAIN_DUMMY_EXAMPLE
+session_name: TRAIN_FROM_CSV
 suppress_history: false
 start_directory: ../
 global_options:
@@ -7,7 +7,7 @@ global_options:
 environment:
   EDITOR: /bin/nano
 windows:
-- window_name: train_dummy_example
+- window_name: train_from_csv
   focus: true
   layout: tiled
   panes:
@@ -26,12 +26,15 @@ windows:
       - sleep 8
       - ./into.sh
       - source /venv_p3/bin/activate 
-      - python catkin_ws/src/drl_local_planner_ros_stable_baselines/rl_agent/scripts/train_scripts/train_ppo.py
+      - python catkin_ws/src/drl_local_planner_ros_stable_baselines/rl_agent/scripts/train_scripts/train_ppo.py test 10000 CNN1DPolicy_multi_input 0.99 4800 0.005 0.0003 0.2 0.46 0.95 15 3 0.2 0.5 19 3 15 1 0 0 "" ped 1
     - shell_command:
-      - sleep 10
-      - ./into.sh
-      - watch -n 0.01 rosparam get /is_training
-    - shell_command:
-      - sleep 10
-      - ./into.sh
-      - watch -n 0.01 rosparam get /is_saved_eval
+      # - conda acttivate ds
+      - tensorboard --logdir ../../data/path_to_tensorboard_log_train
+    # - shell_command:
+    #   - sleep 10
+    #   - ./into.sh
+    #   - watch -n 0.01 rosparam get /is_training
+    # - shell_command:
+    #   - sleep 10
+    #   - ./into.sh
+    #   - watch -n 0.01 rosparam get /is_saved_eval

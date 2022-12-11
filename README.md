@@ -86,6 +86,14 @@ cd <path_to_dir>/drl_local_planner_ros_stable_baselines
 ./docker/scripts/train.sh
 ```
 
+I have got some unexpected errors on that part, therefore, I have created the tmuxp conf in order to check if the model is really training:
+```
+cd <path_to_dir>/drl_local_planner_ros_stable_baselines
+tmuxp load ./docker/scripts/tmuxp/train_from_csv.yaml
+```
+Just put there all parameters from the csv and the number of simulators should be equal to 1.
+
+
 # Run trained models
 
 If you want a good(real) visualization, change the param:
@@ -130,6 +138,7 @@ tmuxp load ./docker/scripts/tmuxp/save_episodes.yaml
 cd <path_to_dir>/drl_local_planner_ros_stable_baselines
 tmuxp load ./docker/scripts/tmuxp/evaluation.yaml
 ```
+ps. check number of stack before launching, it should be correlated to the model trained. `num_stacks` in `rl_agent/scripts/evaluate_agent.py:38` 
 
 3. Launch the analysis of the agent(s)
 ```
@@ -148,5 +157,5 @@ In order to check the results of the agents performance:
 In order to evaluate new trained agent:
 1. change the name of the agent in the list of agent_names in `rl_agent/scripts/evaluate_agent.py:37` and `rl_agent/scripts/analysis.py:95`:
 ```
-agent_names = ["ppo2_1_raw_data_disc_0_by_stepan"]
+agent_names = ["test"]
 ``` 

@@ -91,8 +91,8 @@ def analyse(complexity, evaluation_file_path, reward_file_path, save_path, logge
 if __name__ == '__main__':
     complexity = "complex_map_1"    # train, simple, average, complex, follow_path,
     task_type = "ped"               # static or ped
-    no_episodes = 205
-    agent_names = ["ppo2_1_raw_data_disc_0_by_stepan"]
+    no_episodes = 101
+    agent_names = ["test"]
 
 
     rospack = rospkg.RosPack()
@@ -101,7 +101,7 @@ if __name__ == '__main__':
     config.read('%s/config/path_config.ini' % rl_bringup_path)
     path_to_eval_data_train = config['PATHES']['path_to_eval_data_train']
     path_to_eval_data_test = config['PATHES']['path_to_eval_data_test']
-    path_to_tensorboard_log = config['PATHES']['path_to_tensorboard_log']
+    path_to_tensorboard_log = config['PATHES']['path_to_tensorboard_log_eval']
 
     analysis_path = os.path.join(path_to_tensorboard_log, f'analysis_{agent_names[0]}')
     analysis_logger = tf.summary.FileWriter(analysis_path)

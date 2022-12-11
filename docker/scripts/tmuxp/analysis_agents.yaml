@@ -23,8 +23,8 @@ windows:
       - ./into.sh
       - roslaunch rl_bringup setup.launch ns:="sim1" rl_params:="rl_params_scan"
     - shell_command:
-      - conda activate ds
-      - tensorboard --logdir ../../data/tensorboard_log_ppo_12
+      # - conda activate ds
+      - tensorboard --logdir ../../data/tensorboard_eval
     - shell_command:
       - sleep 10
       - ./into.sh
