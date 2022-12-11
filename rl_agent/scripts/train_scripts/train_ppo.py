@@ -30,6 +30,7 @@ from stable_baselines.ppo2 import PPO2
 from stable_baselines.bench import Monitor
 from stable_baselines.results_plotter import load_results, ts2xy
 import numpy as np
+import time
 
 best_mean_reward, n_callback = -np.inf, 0
 agent_name = ""
@@ -180,6 +181,8 @@ def train_agent_ppo2(config, agent_name, total_timesteps, policy,
 
     # Saving final model
     model.save("%s/%s/%s" % (path_to_models, agent_name, "%s_stage_%d" % (agent_name, stage)), True)
+    rospy.set_param('/is_training', False)
+    time.sleep(2)
     print("Training finished.")
     env.close()
 
@@ -196,6 +199,7 @@ if __name__ == '__main__':
     config = configparser.ConfigParser()
     config.read('%s/config/path_config.ini'%rl_bringup_path)
     path_to_eval_data_train = config['PATHES']['path_to_eval_data_train']
+    os.makedirs(path_to_eval_data_train, exist_ok=True)
 
      # for running via ./entrypoint_ppo2.sh
     if (len(sys.argv) > 1):
@@ -229,20 +233,22 @@ if __name__ == '__main__':
 
     # for quick testing
     else:
-
+        rospy.set_param('/is_training', True)
+        rospy.set_param('/is_saved_eval', False)
         num_envs = 1
         stage = 0
-        agent_name = "ppo2_foo"
+        agent_name = "ppo2_test"
         robot_radius = 0.5
 
         record_processes = []
         if record_evaluation_data:
+            
             save_path = "%s/%s_training" % (path_to_eval_data_train, agent_name)
             for i in range(num_envs):
                 p = Process(target=evaluate_during_training, args=("sim%d"%(i+1), save_path, robot_radius))
                 p.start()
                 record_processes.append(p)
-
+        
         train_agent_ppo2(config,
                          agent_name,
                          gamma=0.99,
@@ -250,7 +256,7 @@ if __name__ == '__main__':
                          ent_coef=0.005,
                          learning_rate=0.00025,
                          cliprange=0.2,
-                         total_timesteps=10000000,
+                         total_timesteps=4000,
                          policy="CNN1DPolicy_multi_input",
                          num_envs=num_envs,
                          nminibatches=1,
@@ -259,11 +265,21 @@ if __name__ == '__main__':
                          rew_fnc = 19,
                          num_stacks= 3,
                          stack_offset=5,
-                         disc_action_space=False,
+                         disc_action_space=True,
                          robot_radius = robot_radius,
                          stage=stage,
-                         pretrained_model_name="ppo2_foo",
+                         pretrained_model_name="",
                          task_mode="ped")
+        rospy.set_param('/is_training', False)
+        # time.sleep(0.1)
+
+        # while not rospy.get_param("/is_saved"):
+        #     time.sleep(1)
+        # time.sleep(10)
 
         for p in record_processes:
+            print(f'SAVED STATE: {rospy.get_param("/is_saved_eval")}')
+            print(f'terminating')
             p.terminate()
+        print(f'terminated')
+    exit(1)

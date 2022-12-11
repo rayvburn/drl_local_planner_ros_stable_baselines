@@ -187,8 +187,16 @@ class Evaluation():
         Evaluates an agent during training. Results are saved in <evaluation_data_path>/evaluation_data/train
         :param agent_name: name of the agent (.pkl)
         """
+        results = {
+            'success': [],
+            'timestep': []
+        }
+        is_training = rospy.get_param("/is_training")
+        # rospy.set_param('/is_saved', False)
+        # print(f'IS TRAINING: type: {type(is_training)} -- value: {is_training}')
 
-        while True:
+        while is_training:
+            # print(f'IS TRAINING: {is_training}')
             self.__timestep -= 1
 
             #Waiting for new task
@@ -197,9 +205,19 @@ class Evaluation():
             self.__done = False
             self.__new_task_started = False
             result = self.evaluate_episode(True)
-            with open('%s.pickle' % (save_path), 'ab') as handle:
-                pickle.dump(result, handle, protocol=pickle.HIGHEST_PROTOCOL)
+            print(f"----- TIMESTEP: {result['timestep']} // SUCCESS: {result['success']} --------------")
+            results['timestep'].append(result['timestep'])
+            results['success'].append(result['success'])
 
+            # print(f'len of results: {len(results)}')
+            is_training = rospy.get_param("/is_training")
+
+        print('saving results')
+        
+        with open('%s.pickle' % (save_path), 'wb+') as handle:
+            pickle.dump(results, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        print('saved')
+        rospy.set_param('/is_saved_eval', True)
 
     def show_paths(self, result):
         """
