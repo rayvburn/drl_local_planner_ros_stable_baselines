@@ -381,6 +381,7 @@ class RewardContainer():
         :param ped_robs containing robot poses relative to pedestrians
         :return: returns reward being close to pedestrians
         """
+        asym_gauss = 0
         for state in ped_robs.agent_states:
             position = state.pose.position
             velocity = state.twist.linear.x
@@ -402,9 +403,9 @@ class RewardContainer():
             A = 2.0
 
             if position.x > 0:
-                asym_gauss = A * np.e ** (-((position.x ** 2) / (2 * (sigm_f ** 2)) + (position.y ** 2) / (2 * (sigm_s ** 2))))
+                asym_gauss += A * np.e ** (-((position.x ** 2) / (2 * (sigm_f ** 2)) + (position.y ** 2) / (2 * (sigm_s ** 2))))
             else:
-                asym_gauss = A * np.e ** (-((position.x ** 2) / (2 * (sigm_b ** 2)) + (position.y ** 2) / (2 * (sigm_s ** 2))))
+                asym_gauss += A * np.e ** (-((position.x ** 2) / (2 * (sigm_b ** 2)) + (position.y ** 2) / (2 * (sigm_s ** 2))))
          
         return asym_gauss * k
 
