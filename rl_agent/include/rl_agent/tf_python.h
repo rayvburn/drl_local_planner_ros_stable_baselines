@@ -13,6 +13,9 @@
 #include <ros/ros.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <tf/transform_listener.h>
+#include <pedsim_msgs/AgentStates.h>
+#include <pedsim_msgs/AgentState.h>
+#include <cmath>
 
 namespace rl_agent {
   /**
@@ -26,6 +29,7 @@ namespace rl_agent {
     public:
       TFPython(const ros::NodeHandle& node_handle);
       void robot_to_goal_transform();
+      void peds_to_robot_transform();
 
     private:
       ros::NodeHandle nh_;
@@ -35,6 +39,12 @@ namespace rl_agent {
       void goal_callback(const geometry_msgs::PoseStamped& goal);
 
       ros::Publisher transformed_goal_pub_;
+
+      pedsim_msgs::AgentStates peds_;
+      ros::Subscriber peds_sub_;
+      void peds_callback(const pedsim_msgs::AgentStates& peds);
+
+      ros::Publisher transformed_peds_pub_;
       tf::TransformListener listener_;
 
   };

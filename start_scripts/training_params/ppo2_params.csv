@@ -12,4 +12,5 @@ ppo2_1_raw_data_disc_0_by_stepan,30000000,CNN1DPolicy_multi_input,0.99,4800,0.00
 ppo2_1_raw_data_disc_0_by_polina,10000,CNN1DPolicy_multi_input,0.99,4800,0.005,0.0003,0.2,0.46,0.95,15,3,0.2,0.5,19,3,15,1,0,0,empty,ped
 ppo2_1_raw_data_disc_0_by_polina1,5000,CNN1DPolicy_multi_input,0.99,4800,0.005,0.0003,0.2,0.46,0.95,15,3,0.2,0.5,19,3,15,1,0,0,empty,ped
 test,5000,CNN1DPolicy_multi_input,0.99,4800,0.005,0.0003,0.2,0.46,0.95,15,3,0.2,0.5,19,3,15,1,0,0,empty,ped
+ppo2_1_raw_data_disc_0_by_stepan_async,30000000,CNN1DPolicy_multi_input,0.99,4800,0.005,0.0003,0.2,0.5,0.95,15,3,0.2,0.5,20,1,15,1,0,0,empty,ped
 

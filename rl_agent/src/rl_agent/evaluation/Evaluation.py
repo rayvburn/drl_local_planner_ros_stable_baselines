@@ -121,7 +121,7 @@ class Evaluation():
         driven_route.header = self.__path.header
         poses = []
         while not done:
-            [static_scan, ped_scan, merged_scan, img, wp, twist, goal] = self.__state_collector.get_state()
+            [static_scan, ped_scan, merged_scan, img, wp, twist, goal, unused_ped_robs] = self.__state_collector.get_state()
             min_obstacle_dist = np.amin(merged_scan.ranges)
             dist_to_goal = math.sqrt(math.pow(goal.position.x, 2) + math.pow(goal.position.y, 2))
 

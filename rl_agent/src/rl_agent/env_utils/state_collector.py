@@ -12,6 +12,7 @@ import copy
 # ros-relevant
 import rospy
 from sensor_msgs.msg import LaserScan
+from pedsim_msgs.msg import AgentStates
 from nav_msgs.msg import OccupancyGrid
 from rl_msgs.msg import Waypoint
 from rl_msgs.srv import StateImageGenerationSrv
@@ -31,6 +32,7 @@ class StateCollector():
         self.__is__new = False                  # True, if waypoint reached
         self.__static_scan = LaserScan()        # Laserscan only contains static objects
         self.__ped_scan = LaserScan()           # Laserscan only contains pedestrians
+        self.__ped_robs = AgentStates()         # Robot relative positions in ped frames
         self.__f_scan = LaserScan()
         self.__f_scan.header.frame_id = "base_footprint"
         self.__b_scan = LaserScan()
@@ -60,6 +62,7 @@ class StateCollector():
                                                   queue_size=1)
             self.twist_sub_ = rospy.Subscriber("%s/twist" % (self.__ns), TwistStamped, self.__twist_callback, queue_size=1)
             self.goal_sub_ = rospy.Subscriber("%s/rl_agent/robot_to_goal" % (self.__ns), PoseStamped, self.__goal_callback, queue_size=1)
+            self.ped_robs_sub = rospy.Subscriber('%s/rl_agent/peds_to_robot' % (self.__ns), AgentStates, self.__ped_robs_callback, queue_size=1)
         else:
             self.static_scan_sub_ = rospy.Subscriber("%s/b_scan" % (self.__ns), LaserScan,
                                                      self.__b_scan_callback,
@@ -124,7 +127,7 @@ class StateCollector():
                 # print("img service call: %f" % (time.time() - start))
             else:
                 self.__img = []
-            return static_scan_msg, ped_scan_msg, merged_scan, self.__img, wp_cp, self.__twist, self.__goal
+            return static_scan_msg, ped_scan_msg, merged_scan, self.__img, wp_cp, self.__twist, self.__goal, self.__ped_robs
         else:
             scans = []
             scans.append(self.__f_scan)
@@ -138,7 +141,7 @@ class StateCollector():
                 self.__img = resp.img
             else:
                 self.__img = []
-            return [], [], merged_scan, self.__img, wp_cp, self.__twist, self.__goal
+            return [], [], merged_scan, self.__img, wp_cp, self.__twist, self.__goal, self.__ped_robs
 
     def get_static_scan(self):
         """
@@ -166,6 +169,9 @@ class StateCollector():
 
     def __ped_scan_callback(self, data):
         self.__ped_scan = data
+
+    def __ped_robs_callback(self, data):
+        self.__ped_robs = data
 
     def __f_scan_callback(self, data):
         self.__f_scan = data

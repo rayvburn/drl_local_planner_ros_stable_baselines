@@ -98,6 +98,45 @@ class RewardContainer():
         rew = self.__check_reward(rew, obstacle_punish, goal_reached_rew, 2.5)
         return rew
 
+    def rew_func_20(self, static_scan, ped_scan_msg, wps, twist, transformed_goal, ped_robs):
+        '''
+                Reward function designed for dynamic training setup
+                :param static_scan: laser scan containing information about static obstacles.
+                :param ped_scan_msg: laser scan containing information about dynamic obstacles.
+                :param wps: next waypoints on path
+                :param twist: velocity of robot
+                :param transformed_goal: final goal in robot frame
+                :return: reward value
+                '''
+        standing_still_punish = 0
+        if (abs(twist.twist.linear.x) < 0.001 and abs(twist.twist.angular.z) < 0.001):
+            standing_still_punish = -0.001
+            self.__still_time += 0.1
+        else:
+            self.__still_time = 0.0
+
+        if (abs(twist.twist.linear.x) < 0.001 and abs(twist.twist.angular.z) > 0.001):
+            standing_still_punish = -0.01
+
+        wp_approached_rew = self.__get_wp_approached(wps, 5.5, 4.5, 0.0)
+
+        # Did the agent bump into an obstacle?
+        obstacle_punish_static = self.__get_obstacle_punish(static_scan.ranges, 7, self.__robot_radius)
+        obstacle_punish_ped = 0
+        if (self.__still_time < 0.8):
+            obstacle_punish_ped = self.__get_ped_asym_gaussian_punish(ped_robs, 7)
+        obstacle_punish = min(obstacle_punish_ped, obstacle_punish_static)
+
+        # Did the agent reached the goal?
+        goal_reached_rew = self.__get_goal_reached_rew(transformed_goal, 10)
+
+        rew = (wp_approached_rew + obstacle_punish + goal_reached_rew + standing_still_punish)
+        if (rew < -2.5):
+            test = "debug"
+        rew = self.__check_reward(rew, obstacle_punish, goal_reached_rew, 2.5)
+        # return rew
+        return obstacle_punish_ped
+
     def rew_func_2_1(self, static_scan, ped_scan_msg, wps, twist, transformed_goal):
         '''
         Reward function designed for dynamic training setup
@@ -335,4 +374,38 @@ class RewardContainer():
         :return: sqrt(x^2 + y^2)
         """
         return math.sqrt(math.pow(x, 2) + math.pow(y, 2))
+
+    def __get_ped_asym_gaussian_punish(self, ped_robs, k):
+        """
+        Returns a negative reward if the robot is close to pedestrians.
+        :param ped_robs containing robot poses relative to pedestrians
+        :return: returns reward being close to pedestrians
+        """
+        asym_gauss = 0
+        for state in ped_robs.agent_states:
+            position = state.pose.position
+            velocity = state.twist.linear.x
+
+            # Params
+            sigm = 0.65 # m
+            f_f = 2.5
+            f_b = 1.0
+            f_s = 1.0
+
+            # Code
+            sigm_f = sigm * (1 + f_f * velocity)
+            if velocity == 0:
+                sigm_b = sigm_f
+            else:
+                sigm_b = sigm * (f_b / (velocity + 1))
+            sigm_s = sigm * (1 + f_s * velocity)
+
+            A = 2.0
+
+            if position.x > 0:
+                asym_gauss += A * np.e ** (-((position.x ** 2) / (2 * (sigm_f ** 2)) + (position.y ** 2) / (2 * (sigm_s ** 2))))
+            else:
+                asym_gauss += A * np.e ** (-((position.x ** 2) / (2 * (sigm_b ** 2)) + (position.y ** 2) / (2 * (sigm_s ** 2))))
+         
+        return asym_gauss * k
 

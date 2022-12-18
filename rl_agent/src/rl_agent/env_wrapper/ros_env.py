@@ -25,6 +25,7 @@ from sensor_msgs.msg import LaserScan
 from rl_msgs.msg import Waypoint
 from geometry_msgs.msg import TwistStamped, Twist, Pose
 from nav_msgs.msg import OccupancyGrid
+from pedsim_msgs.msg import AgentStates
 
 # Helper classes
 from rl_agent.env_utils.debug_ros_env import DebugRosEnv
@@ -76,6 +77,7 @@ class RosEnvAbs(gym.Env):
             self.wp_ = Waypoint()                       # next waypoints on global plan
             self.static_scan_ = LaserScan()             # most recent static Laserscan
             self.ped_scan_ = LaserScan()                # most recent pedestrian Laserscan
+            self.ped_robs_ = AgentStates()                     # most recent rob poses in pedestrian frames
 
 
 
@@ -235,7 +237,7 @@ class RosEnvAbs(gym.Env):
         raw laser scans
         waypoints in robot frame.
         """
-        [self.static_scan_, self.ped_scan_, self.merged_scan_, self.input_img_, self.wp_, self.twist_, self.__transformed_goal] = self.__state_collector.get_state()
+        [self.static_scan_, self.ped_scan_, self.merged_scan_, self.input_img_, self.wp_, self.twist_, self.__transformed_goal, self.ped_robs_] = self.__state_collector.get_state()
         if(self.debug_):
             self.debugger_.show_wp(self.wp_)
 
@@ -255,6 +257,9 @@ class RosEnvAbs(gym.Env):
         elif self.REWARD_FUNC == 19:
             reward = self.__reward_cont.rew_func_19(self.static_scan_, self.ped_scan_, self.wp_, self.twist_,
                                                     self.__transformed_goal)
+        elif self.REWARD_FUNC == 20:
+            reward = self.__reward_cont.rew_func_20(self.static_scan_, self.ped_scan_, self.wp_, self.twist_,
+                                                    self.__transformed_goal, self.ped_robs_)
 
         else:
             raise NotImplementedError
