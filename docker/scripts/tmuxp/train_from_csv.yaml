@@ -26,7 +26,7 @@ windows:
       - sleep 8
       - ./into.sh
       - source /venv_p3/bin/activate 
-      - python catkin_ws/src/drl_local_planner_ros_stable_baselines/rl_agent/scripts/train_scripts/train_ppo.py test 10000 CNN1DPolicy_multi_input 0.99 4800 0.005 0.0003 0.2 0.46 0.95 15 3 0.2 0.5 19 3 15 1 0 0 "" ped 1
+      - python catkin_ws/src/drl_local_planner_ros_stable_baselines/rl_agent/scripts/train_scripts/train_ppo.py ppo2_1_raw_data_disc_0_by_polina_async 10000 CNN1DPolicy_multi_input 0.99 4800 0.005 0.0003 0.2 0.46 0.95 15 3 0.2 0.5 20 3 15 1 0 0 "" ped 1
     - shell_command:
       # - conda acttivate ds
       - tensorboard --logdir ../../data/path_to_tensorboard_log_train

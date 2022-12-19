@@ -8,6 +8,7 @@
 
 
 import numpy as np
+from scipy import stats
 import math
 import rospy
 
@@ -126,6 +127,7 @@ class RewardContainer():
         obstacle_punish_ped = 0
         if (self.__still_time < 0.8):
             obstacle_punish_ped = self.__get_ped_asym_gaussian_punish(ped_robs, 7)
+            print(f'obstacle punishment: {obstacle_punish_ped}')
         obstacle_punish = min(obstacle_punish_ped, obstacle_punish_static)
 
         # Did the agent reached the goal?
@@ -178,6 +180,46 @@ class RewardContainer():
         rew = self.__check_reward(rew, obstacle_punish, goal_reached_rew, 2.5)
         # return rew
         return obstacle_punish_ped
+
+    def rew_func_30(self, static_scan, ped_scan_msg, wps, twist, transformed_goal, ped_robs):
+        '''
+                Reward function designed for dynamic training setup
+                :param static_scan: laser scan containing information about static obstacles.
+                :param ped_scan_msg: laser scan containing information about dynamic obstacles.
+                :param wps: next waypoints on path
+                :param twist: velocity of robot
+                :param transformed_goal: final goal in robot frame
+                :return: reward value
+                '''
+        standing_still_punish = 0
+        if (abs(twist.twist.linear.x) < 0.001 and abs(twist.twist.angular.z) < 0.001):
+            standing_still_punish = -0.001
+            self.__still_time += 0.1
+        else:
+            self.__still_time = 0.0
+
+        if (abs(twist.twist.linear.x) < 0.001 and abs(twist.twist.angular.z) > 0.001):
+            standing_still_punish = -0.01
+
+        wp_approached_rew = self.__get_wp_approached(wps, 5.5, 4.5, 0.0)
+
+        # Did the agent bump into an obstacle?
+        obstacle_punish_static = self.__get_obstacle_punish(static_scan.ranges, 7, self.__robot_radius)
+        obstacle_punish_ped = 0
+        if (self.__still_time < 0.8):
+            obstacle_punish_ped = self.__get_ped_sym_gaussian_punish(ped_robs, 7)
+        obstacle_punish = min(obstacle_punish_ped, obstacle_punish_static)
+
+        # Did the agent reached the goal?
+        goal_reached_rew = self.__get_goal_reached_rew(transformed_goal, 10)
+
+        rew = (wp_approached_rew + obstacle_punish + goal_reached_rew + standing_still_punish)
+        if (rew < -2.5):
+            test = "debug"
+        rew = self.__check_reward(rew, obstacle_punish, goal_reached_rew, 2.5)
+        print(f'common rew: {rew}')
+        return rew
+        # return obstacle_punish_ped    
 
     def rew_func_2_1(self, static_scan, ped_scan_msg, wps, twist, transformed_goal):
         '''
@@ -424,6 +466,7 @@ class RewardContainer():
         :return: returns reward being close to pedestrians
         """
         asym_gauss = 0
+        print(f'ped_robs.agent_states: {ped_robs.agent_states}')
         for state in ped_robs.agent_states:
             position = state.pose.position
             velocity = state.twist.linear.x
@@ -499,3 +542,57 @@ class RewardContainer():
                 punishment = min(-b_width/np.sqrt(position.x**2 + position.y**2), punishment)
         
         return punishment # punish with the closest pedestrian
+
+    def __get_ped_sym_gaussian_punish(self, ped_robs, k=1):
+            """
+            Returns a negative reward if the robot is close to pedestrians.
+            :param ped_robs containing robot poses relative to pedestrians
+            :return: returns reward being close to pedestrians
+            """
+            punishments = []
+            print(f'ped_robs.agent_states: {ped_robs.agent_states}')
+            for state in ped_robs.agent_states:
+                position = state.pose.position
+                velocity = state.twist.linear.x
+
+                punishments.append(self.__get_punish(position, k))
+                print(f'punishment: {punishments}')
+            
+            return max(punishments)
+
+
+    def __get_error(self, coord, offset, sigma, safe_radius):
+        if coord < -5 or coord > 5:
+            return 0
+        x_data = np.arange(-5, 5, 0.01)
+
+        ## y-axis as the gaussian
+        y_data = stats.norm.pdf(x_data, offset, sigma)
+        mask = np.logical_and((x_data >= 0.0), (x_data <= safe_radius))
+        y_data[mask] = np.max(y_data)
+        r = round(coord, 2)
+        ind = np.where(np.logical_and(x_data >= (r - 0.001), x_data <= (r + 0.001)))[0][0]
+        return y_data[ind]
+
+
+    def __get_punish(self, position, A=1):
+        s_x = 0.25
+        s_y = 0.2
+        r0 = 0.25
+        offset_x = 0.2
+        offset_y = 0
+
+        x_punish = self.__get_error(position.x, offset_x, s_x, r0)
+        y_punish = self.__get_error(position.y, offset_y, s_y, r0)
+
+        print(f'x_pun: {x_punish} ---- y_pun: {y_punish}')
+
+        return -A * np.sqrt(x_punish ** 2 + y_punish ** 2)
+        # return np.exp(((x_punish ** 2 )/s_x ** 2) + (y_punish ** 2)/(s_y ** 2))
+
+
+        # gauss = np.exp(-(((ped_pos[0] - robot_pos[0])  ** 2) / (2 * (s_x ** 2)) + ((ped_pos[1] - robot_pos[1]) ** 2) / (2 * (s_y ** 2))))
+        # gauss2 = np.exp(-((x_punish[]) + ()))
+        # return x_punish, y_punish, gauss
+
+        ## plot data
