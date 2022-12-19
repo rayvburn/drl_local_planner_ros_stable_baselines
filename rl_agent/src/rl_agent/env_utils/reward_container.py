@@ -26,6 +26,7 @@ class RewardContainer():
         self.__goal_radius = goal_radius
         self.__still_time = 0.0
         self.__max_trans_vel = max_trans_vel
+        self.ratio = 1./0.85
 
 
     def reset(self, wps):
@@ -125,6 +126,47 @@ class RewardContainer():
         obstacle_punish_ped = 0
         if (self.__still_time < 0.8):
             obstacle_punish_ped = self.__get_ped_asym_gaussian_punish(ped_robs, 7)
+        obstacle_punish = min(obstacle_punish_ped, obstacle_punish_static)
+
+        # Did the agent reached the goal?
+        goal_reached_rew = self.__get_goal_reached_rew(transformed_goal, 10)
+
+        rew = (wp_approached_rew + obstacle_punish + goal_reached_rew + standing_still_punish)
+        if (rew < -2.5):
+            test = "debug"
+        rew = self.__check_reward(rew, obstacle_punish, goal_reached_rew, 2.5)
+        # return rew
+        return obstacle_punish_ped
+
+    def rew_func_21(self, static_scan, ped_scan_msg, wps, twist, transformed_goal, ped_robs):
+        '''
+                Reward function designed for dynamic training setup
+                :param static_scan: laser scan containing information about static obstacles.
+                :param ped_scan_msg: laser scan containing information about dynamic obstacles.
+                :param wps: next waypoints on path
+                :param twist: velocity of robot
+                :param transformed_goal: final goal in robot frame
+                :return: reward value
+                '''
+        standing_still_punish = 0
+        if (abs(twist.twist.linear.x) < 0.001 and abs(twist.twist.angular.z) < 0.001):
+            standing_still_punish = -0.001
+            self.__still_time += 0.1
+        else:
+            self.__still_time = 0.0
+
+        if (abs(twist.twist.linear.x) < 0.001 and abs(twist.twist.angular.z) > 0.001):
+            standing_still_punish = -0.01
+
+        wp_approached_rew = self.__get_wp_approached(wps, 5.5, 4.5, 0.0)
+
+        # Did the agent bump into an obstacle?
+        obstacle_punish_static = self.__get_obstacle_punish(static_scan.ranges, 7, self.__robot_radius)
+        obstacle_punish_ped = 0
+        if (self.__still_time < 0.8):
+            ratio = 1
+            obstacle_punish_ped = self.__get_ped_IPS(ped_robs, 7) + self.__get_ped_SZ(ped_robs, 7) + self.__get_ped_B(ped_robs, 7)
+            obstacle_punish_ped = max(min(obstacle_punish_ped, -self.ratio), -7.0) # -7.0 is the largest negative punishment value of the IPS, SZ and B functions
         obstacle_punish = min(obstacle_punish_ped, obstacle_punish_static)
 
         # Did the agent reached the goal?
@@ -407,4 +449,52 @@ class RewardContainer():
                 asym_gauss = A * np.e ** (-((position.x ** 2) / (2 * (sigm_b ** 2)) + (position.y ** 2) / (2 * (sigm_s ** 2))))
          
         return asym_gauss * k
+    
+    def __get_ped_SZ(self, ped_robs, k=7.0):
+        """
+        Returns a negative reward if the robot is close to pedestrians.
+        :param ped_robs containing robot poses relative to pedestrians
+        :return: returns reward being close to pedestrians
+        """
+        punishment = 0
+        sz_radius = self.ratio
+        for state in ped_robs.agent_states:
+            position = state.pose.position
+            if position.x**2 + position.y**2 < sz_radius**2:
+                punishment = min(-k, punishment)
+        return punishment
 
+    def __get_ped_IPS(self, ped_robs, k=7.0):
+        """
+        Returns a negative reward if the robot is close to pedestrians.
+        :param ped_robs containing robot poses relative to pedestrians
+        :return: returns reward being close to pedestrians
+        """
+        punishment = 0
+        ratio = 1.2/0.85
+        ips_width = 4.0 / ratio
+        ips_length = 1.0 / ratio
+        for state in ped_robs.agent_states:
+            position = state.pose.position
+            
+            if position.x < ips_width and position.x > 0.0 and abs(position.y) < ips_length/2: 
+                punishment = min(punishment, -k)
+        return punishment
+    
+    def __get_ped_B(self, ped_robs):
+        """
+        Returns a negative reward if the robot is close to pedestrians.
+        :param ped_robs containing robot poses relative to pedestrians
+        :return: returns reward being close to pedestrians
+        """
+        punishment = 0
+        ratio = 1.2/0.85
+        b_width = 5.0 / ratio
+        b_length = 2.4 / ratio
+        for state in ped_robs.agent_states:
+            position = state.pose.position
+            
+            if position.x > -b_width and position.x < 0.0 and abs(position.y) < b_length/2:
+                punishment = min(-b_width/np.sqrt(position.x**2 + position.y**2), punishment)
+        
+        return punishment # punish with the closest pedestrian
