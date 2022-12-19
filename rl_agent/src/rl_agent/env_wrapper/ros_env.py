@@ -260,7 +260,9 @@ class RosEnvAbs(gym.Env):
         elif self.REWARD_FUNC == 20:
             reward = self.__reward_cont.rew_func_20(self.static_scan_, self.ped_scan_, self.wp_, self.twist_,
                                                     self.__transformed_goal, self.ped_robs_)
-
+        elif self.REWARD_FUNC == 21:
+            reward = self.__reward_cont.rew_func_21(self.static_scan_, self.ped_scan_, self.wp_, self.twist_,
+                                                    self.__transformed_goal, self.ped_robs_)
         else:
             raise NotImplementedError
 
