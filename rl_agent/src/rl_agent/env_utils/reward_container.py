@@ -165,7 +165,7 @@ class RewardContainer():
         obstacle_punish_ped = 0
         if (self.__still_time < 0.8):
             ratio = 1
-            obstacle_punish_ped = self.__get_ped_IPS(ped_robs, 7) + self.__get_ped_SZ(ped_robs, 7) + self.__get_ped_B(ped_robs, 7)
+            obstacle_punish_ped = self.__get_ped_IPS(ped_robs, 7) + self.__get_ped_SZ(ped_robs, 7) + self.__get_ped_B(ped_robs)
             obstacle_punish_ped = max(min(obstacle_punish_ped, -self.ratio), -7.0) # -7.0 is the largest negative punishment value of the IPS, SZ and B functions
         obstacle_punish = min(obstacle_punish_ped, obstacle_punish_static)
 
