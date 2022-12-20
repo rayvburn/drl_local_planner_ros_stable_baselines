@@ -69,8 +69,8 @@ def analyse(complexity, evaluation_file_path, reward_file_path, save_path):
 if __name__ == '__main__':
     complexity = "complex_map_1"    # train, simple, average, complex, follow_path,
     task_type = "ped"               # static or ped
-    no_episodes = 100
-    agent_names = ["ppo2_1_raw_data_disc_0_by_stepan"]
+    no_episodes = 500
+    agent_names = ["ppo2_1_raw_data_disc_0", "ppo2_1_raw_data_disc_0_by_stepan_async"]
 
 
     rospack = rospkg.RosPack()
