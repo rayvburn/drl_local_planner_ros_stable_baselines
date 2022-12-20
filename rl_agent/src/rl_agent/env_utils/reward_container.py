@@ -482,7 +482,7 @@ class RewardContainer():
                 punishment = min(punishment, -k)
         return punishment
     
-    def __get_ped_B(self, ped_robs):
+    def __get_ped_B(self, ped_robs, k=7.0):
         """
         Returns a negative reward if the robot is close to pedestrians.
         :param ped_robs containing robot poses relative to pedestrians
@@ -496,6 +496,8 @@ class RewardContainer():
             position = state.pose.position
             
             if position.x > -b_width and position.x < 0.0 and abs(position.y) < b_length/2:
-                punishment = min(-b_width/np.sqrt(position.x**2 + position.y**2), punishment)
+                #-k * (x / (5 / ratio) + 1)
+                punishment = min(- k * (position.x / b_width + 1), punishment)
+                # punishment = min(-b_width/np.sqrt(position.x**2 + position.y**2), punishment)
         
         return punishment # punish with the closest pedestrian
