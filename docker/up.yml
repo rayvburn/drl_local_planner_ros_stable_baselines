@@ -18,8 +18,8 @@ services:
               source: ${PRODUCTION_PATH}/../..
               target: /usr/catkin_ws/src
             - type: bind
-              source: ${PRODUCTION_PATH}/../example_agents
-              target: /data/agents
+              source: ${PRODUCTION_PATH}/../data
+              target: /data
             - type: bind
               source: /tmp/.X11-unix
               target: /tmp/.X11-unix

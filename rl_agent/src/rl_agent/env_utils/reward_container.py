@@ -127,7 +127,7 @@ class RewardContainer():
         obstacle_punish_ped = 0
         if (self.__still_time < 0.8):
             obstacle_punish_ped = self.__get_ped_asym_gaussian_punish(ped_robs, 7)
-            print(f'obstacle punishment: {obstacle_punish_ped}')
+            # print(f'obstacle punishment: {obstacle_punish_ped}')
         obstacle_punish = min(obstacle_punish_ped, obstacle_punish_static)
 
         # Did the agent reached the goal?
@@ -207,7 +207,9 @@ class RewardContainer():
         obstacle_punish_static = self.__get_obstacle_punish(static_scan.ranges, 7, self.__robot_radius)
         obstacle_punish_ped = 0
         if (self.__still_time < 0.8):
-            obstacle_punish_ped = self.__get_ped_sym_gaussian_punish(ped_robs, 7)
+            # print('GOT HERE')
+            # print(f'ped robs: {ped_robs.agent_states}')
+            obstacle_punish_ped = self.__get_ped_sym_gaussian_punish(ped_robs, 1)
         obstacle_punish = min(obstacle_punish_ped, obstacle_punish_static)
 
         # Did the agent reached the goal?
@@ -549,14 +551,14 @@ class RewardContainer():
             :param ped_robs containing robot poses relative to pedestrians
             :return: returns reward being close to pedestrians
             """
-            punishments = []
-            print(f'ped_robs.agent_states: {ped_robs.agent_states}')
+            punishments = [0]
+            # print(f'ped_robs.agent_states: {ped_robs.agent_states}')
             for state in ped_robs.agent_states:
                 position = state.pose.position
                 velocity = state.twist.linear.x
 
                 punishments.append(self.__get_punish(position, k))
-                print(f'punishment: {punishments}')
+                # print(f'punishment: {punishments}')
             
             return max(punishments)
 

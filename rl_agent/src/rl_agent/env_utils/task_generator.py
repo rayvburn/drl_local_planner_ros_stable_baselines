@@ -44,8 +44,7 @@ class TaskGenerator():
         # Class variables
         self.NS = ns                                    # namespace
         self.ROBOT_RADIUS = robot_radius                # radius of the robot
-        self.__update_rate = \
-            1/rospy.get_param("%s/rl_agent/update_frequency"%ns)
+        self.__update_rate = rospy.get_param("%s/rl_agent/update_frequency"%ns)
         self.__state_collector = state_collector        # Collects state information
         self.__move_base_status_id = ""                 # recent id of move_base status
         self.__map = OccupancyGrid()                    # global map
