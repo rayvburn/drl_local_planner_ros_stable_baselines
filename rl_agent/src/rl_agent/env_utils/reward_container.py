@@ -209,7 +209,7 @@ class RewardContainer():
         if (self.__still_time < 0.8):
             # print('GOT HERE')
             # print(f'ped robs: {ped_robs.agent_states}')
-            obstacle_punish_ped = self.__get_ped_sym_gaussian_punish(ped_robs, 1)
+            obstacle_punish_ped = self.__get_ped_sym_gaussian_punish(ped_robs, 7)
         obstacle_punish = min(obstacle_punish_ped, obstacle_punish_static)
 
         # Did the agent reached the goal?
@@ -219,7 +219,7 @@ class RewardContainer():
         if (rew < -2.5):
             test = "debug"
         rew = self.__check_reward(rew, obstacle_punish, goal_reached_rew, 2.5)
-        print(f'common rew: {rew}')
+        # print(f'common rew: {rew} ')
         return rew
         # return obstacle_punish_ped    
 
@@ -560,36 +560,40 @@ class RewardContainer():
                 punishments.append(self.__get_punish(position, k))
                 # print(f'punishment: {punishments}')
             
-            return max(punishments)
+            return min(punishments)
 
 
-    def __get_error(self, coord, offset, sigma, safe_radius):
+    def __get_error(self, coord, offset, sigma, safe_radius, A):
         if coord < -5 or coord > 5:
             return 0
         x_data = np.arange(-5, 5, 0.01)
 
         ## y-axis as the gaussian
-        y_data = stats.norm.pdf(x_data, offset, sigma)
-        mask = np.logical_and((x_data >= 0.0), (x_data <= safe_radius))
+        y_data = stats.norm.pdf(x_data, offset, sigma) * A
+        mask = np.logical_and((x_data >= (0.0 + offset)), (x_data <= (safe_radius + offset)))
         y_data[mask] = np.max(y_data)
         r = round(coord, 2)
-        ind = np.where(np.logical_and(x_data >= (r - 0.001), x_data <= (r + 0.001)))[0][0]
+        res = np.where(np.logical_and(x_data >= (r - 0.001), x_data <= (r + 0.001)))
+        if len(res[0]) != 0:
+            ind = np.where(np.logical_and(x_data >= (r - 0.001), x_data <= (r + 0.001)))[0][0]
+        else:
+            return 0
         return y_data[ind]
 
 
     def __get_punish(self, position, A=1):
-        s_x = 0.25
-        s_y = 0.2
+        s_x = 0.35
+        s_y = 0.35
         r0 = 0.25
         offset_x = 0.2
         offset_y = 0
 
-        x_punish = self.__get_error(position.x, offset_x, s_x, r0)
-        y_punish = self.__get_error(position.y, offset_y, s_y, r0)
+        x_punish = self.__get_error(position.x, offset_x, s_x, r0, A)
+        y_punish = self.__get_error(position.y, offset_y, s_y, r0, A)
 
-        print(f'x_pun: {x_punish} ---- y_pun: {y_punish}')
+        # print(f'punish: {-A * np.max([x_punish, y_punish])}')
 
-        return -A * np.sqrt(x_punish ** 2 + y_punish ** 2)
+        return -A * np.max([x_punish, y_punish])
         # return np.exp(((x_punish ** 2 )/s_x ** 2) + (y_punish ** 2)/(s_y ** 2))
 
 

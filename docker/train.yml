@@ -27,4 +27,4 @@ services:
               source: /tmp/.X11-unix
               target: /tmp/.X11-unix
         command: bash -c "cd catkin_ws/src/drl_local_planner_ros_stable_baselines/start_scripts;
-                 ./entrypoint_ppo2.sh ppo2_1_raw_data_disc_0_by_polina_async 1"
+                 ./entrypoint_ppo2.sh ppo2_1_raw_data_disc_0_by_polina_sym_new 1"
