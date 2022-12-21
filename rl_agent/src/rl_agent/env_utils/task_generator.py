@@ -298,8 +298,14 @@ class TaskGenerator():
         """
         msg = Float64()
         msg.data = self.__update_rate
-        rospy.wait_for_service('%s/step' % self.NS)
-        self.__sim_step(msg)
+        valid = False
+        while not valid:
+            try:
+                rospy.wait_for_service('%s/step' % self.NS)
+                self.__sim_step(msg)
+                valid = True
+            except IndexError:
+                print("Some problem with multiprocessing, try again..")
         return
 
     def __set_random_robot_pos(self):
