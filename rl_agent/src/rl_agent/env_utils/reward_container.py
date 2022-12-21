@@ -135,8 +135,8 @@ class RewardContainer():
         if (rew < -2.5):
             test = "debug"
         rew = self.__check_reward(rew, obstacle_punish, goal_reached_rew, 2.5)
-        # return rew
-        return obstacle_punish_ped
+        return rew
+        # return obstacle_punish_ped
 
     def rew_func_21(self, static_scan, ped_scan_msg, wps, twist, transformed_goal, ped_robs):
         '''
@@ -176,8 +176,8 @@ class RewardContainer():
         if (rew < -2.5):
             test = "debug"
         rew = self.__check_reward(rew, obstacle_punish, goal_reached_rew, 2.5)
-        # return rew
-        return obstacle_punish_ped
+        return rew
+        # return obstacle_punish_ped
 
     def rew_func_2_1(self, static_scan, ped_scan_msg, wps, twist, transformed_goal):
         '''
