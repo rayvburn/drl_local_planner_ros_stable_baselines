@@ -199,7 +199,7 @@ def evaluate_during_training(ns, save_path, robot_radius):
     eval.evaluate_training(save_path)
 
 if __name__ == '__main__':
-    record_evaluation_data = True
+    record_evaluation_data = False
     rospy.set_param('/is_training', True)
     rospy.set_param('/is_saved_eval', False)
 

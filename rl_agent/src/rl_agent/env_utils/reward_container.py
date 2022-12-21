@@ -211,6 +211,8 @@ class RewardContainer():
             # print(f'ped robs: {ped_robs.agent_states}')
             obstacle_punish_ped = self.__get_ped_sym_gaussian_punish(ped_robs, 7)
         obstacle_punish = min(obstacle_punish_ped, obstacle_punish_static)
+        obstacle_punish = max(obstacle_punish, -7)
+
 
         # Did the agent reached the goal?
         goal_reached_rew = self.__get_goal_reached_rew(transformed_goal, 10)
@@ -563,13 +565,13 @@ class RewardContainer():
             return min(punishments)
 
 
-    def __get_error(self, coord, offset, sigma, safe_radius, A):
+    def __get_error(self, coord, offset, sigma, safe_radius):
         if coord < -5 or coord > 5:
             return 0
         x_data = np.arange(-5, 5, 0.01)
 
         ## y-axis as the gaussian
-        y_data = stats.norm.pdf(x_data, offset, sigma) * A
+        y_data = stats.norm.pdf(x_data, offset, sigma)
         mask = np.logical_and((x_data >= (0.0 + offset)), (x_data <= (safe_radius + offset)))
         y_data[mask] = np.max(y_data)
         r = round(coord, 2)
@@ -588,8 +590,8 @@ class RewardContainer():
         offset_x = 0.2
         offset_y = 0
 
-        x_punish = self.__get_error(position.x, offset_x, s_x, r0, A)
-        y_punish = self.__get_error(position.y, offset_y, s_y, r0, A)
+        x_punish = self.__get_error(position.x, offset_x, s_x, r0)
+        y_punish = self.__get_error(position.y, offset_y, s_y, r0)
 
         # print(f'punish: {-A * np.max([x_punish, y_punish])}')
 

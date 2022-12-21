@@ -236,7 +236,7 @@ class Evaluation():
                 results['success'].extend([result['success']])
                 results['time_exceeded'].extend([result['time_exceeded']])
 
-            print(f'len of results: {len(results["success"])}')
+            # print(f'len of results: {len(results["success"])}')
             is_training = rospy.get_param("/is_training")
 
         print('saving results')
