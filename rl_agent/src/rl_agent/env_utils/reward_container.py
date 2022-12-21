@@ -400,12 +400,12 @@ class RewardContainer():
                 sigm_b = sigm * (f_b / (velocity + 1))
             sigm_s = sigm * (1 + f_s * velocity)
 
-            A = 2.0
+            A = 1.3
 
             if position.x > 0:
-                asym_gauss += A * np.e ** (-((position.x ** 2) / (2 * (sigm_f ** 2)) + (position.y ** 2) / (2 * (sigm_s ** 2))))
+                asym_gauss = max(asym_gauss, A * np.e ** (-((position.x ** 2) / (2 * (sigm_f ** 2)) + (position.y ** 2) / (2 * (sigm_s ** 2)))))
             else:
-                asym_gauss += A * np.e ** (-((position.x ** 2) / (2 * (sigm_b ** 2)) + (position.y ** 2) / (2 * (sigm_s ** 2))))
+                asym_gauss = max(asym_gauss, A * np.e ** (-((position.x ** 2) / (2 * (sigm_b ** 2)) + (position.y ** 2) / (2 * (sigm_s ** 2)))))
          
-        return asym_gauss * k
+        return asym_gauss * (-k)
 
