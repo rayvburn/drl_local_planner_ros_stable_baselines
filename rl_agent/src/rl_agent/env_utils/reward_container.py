@@ -386,7 +386,7 @@ class RewardContainer():
             velocity = state.twist.linear.x
 
             # Params
-            sigm = 0.65 # m
+            sigm = 0.4 # m
             f_f = 2.5
             f_b = 1.0
             f_s = 1.0
@@ -399,7 +399,7 @@ class RewardContainer():
                 sigm_b = sigm * (f_b / (velocity + 1))
             sigm_s = sigm * (1 + f_s * velocity)
 
-            A = 1.3
+            A = 1.5
 
             if position.x > 0:
                 asym_gauss = max(asym_gauss, A * np.e ** (-((position.x ** 2) / (2 * (sigm_f ** 2)) + (position.y ** 2) / (2 * (sigm_s ** 2)))))
