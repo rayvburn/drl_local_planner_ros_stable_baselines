@@ -15,13 +15,13 @@ services:
         runtime: nvidia
         volumes:
             - type: bind
-              source: ${PRODUCTION_PATH}/../..
-              target: /usr/catkin_ws/src
+              source: ${PRODUCTION_PATH}/drl_local_planner_ros_stable_baselines
+              target: /usr/catkin_ws/src/drl_local_planner_ros_stable_baselines
             - type: bind
-              source: ${PRODUCTION_PATH}/../data
+              source: ${PRODUCTION_PATH}/drl_local_planner_ros_stable_baselines/data
               target: /data
             - type: bind
               source: /tmp/.X11-unix
               target: /tmp/.X11-unix
         command: bash -c "source /opt/ros/melodic/setup.sh;
-                 roscore"
+                          roscore"

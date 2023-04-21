@@ -1,11 +1,11 @@
 #!/bin/bash
 
 cd "$(dirname "$0")"
-cd ..
+cd ../../..
 export PRODUCTION_PATH=$PWD
 export ARCH=`uname -m`
 export NUM_THREADS=`nproc`
 
-docker-compose --env-file $PRODUCTION_PATH/up.env \
-    -f $PRODUCTION_PATH/up_eval.yml \
+docker-compose --env-file $PRODUCTION_PATH/drl_local_planner_ros_stable_baselines/docker/up.env \
+    -f $PRODUCTION_PATH/drl_local_planner_ros_stable_baselines/docker/up_eval.yml \
     up $@
