@@ -1,8 +1,7 @@
-FROM osrf/ros:melodic-desktop-full
+FROM osrf/ros:noetic-desktop-full-focal
 
 # Install libs
-RUN apt-get update && apt-get install -y \
-    libqt4-dev \
+RUN sudo apt-get update && sudo apt-get install -y \
     libopencv-dev \
     liblua5.2-dev \
     virtualenv \
@@ -10,11 +9,11 @@ RUN apt-get update && apt-get install -y \
     python3-dev \
     git \
     ssh \
-    ros-melodic-tf2-geometry-msgs \
-    ros-melodic-navigation \
-    ros-melodic-rviz \
-    ros-melodic-pcl-ros \
-    ros-melodic-gazebo-ros
+    ros-noetic-tf2-geometry-msgs \
+    ros-noetic-navigation \
+    ros-noetic-rviz \
+    ros-noetic-pcl-ros \
+    ros-noetic-gazebo-ros
 
 WORKDIR /usr
 
@@ -26,7 +25,7 @@ RUN /venv_p3/bin/pip install \
     catkin_pkg \
     exception \
     numpy \
-    tensorflow=="1.13.1" \
+    tensorflow=="2.5.0" \
     gym==0.15.7 \
     pyquaternion \ 
     mpi4py \
