@@ -1,7 +1,7 @@
 version: "3.8"
 services:
     drl_local_planner:
-        image: ${ARCH}melodic/drl_local_planner:${TAG}
+        image: ${ARCH}noetic/drl_local_planner:${TAG}
         network_mode: host
         container_name: drl_local_planner
         env_file: $ENV_FILE

@@ -1,7 +1,7 @@
 FROM osrf/ros:noetic-desktop-full-focal
 
 # Install libs
-RUN sudo apt-get update && sudo apt-get install -y \
+RUN apt-get update && apt-get install -y \
     libopencv-dev \
     liblua5.2-dev \
     virtualenv \
@@ -10,6 +10,10 @@ RUN sudo apt-get update && sudo apt-get install -y \
     git \
     ssh \
     ros-noetic-tf2-geometry-msgs \
+    python3-tf2-sensor-msgs \
+    ros-noetic-tf2-sensor-msgs \
+    ros-noetic-tf2-msgs \
+    python3-pcl \
     ros-noetic-navigation \
     ros-noetic-rviz \
     ros-noetic-pcl-ros \
@@ -25,7 +29,7 @@ RUN /venv_p3/bin/pip install \
     catkin_pkg \
     exception \
     numpy \
-    tensorflow=="2.5.0" \
+    # tensorflow=="1.13.1" \
     gym==0.15.7 \
     pyquaternion \ 
     mpi4py \
@@ -34,8 +38,8 @@ RUN /venv_p3/bin/pip install \
 # Add catkin repos
 RUN mkdir -p /usr/catkin_ws/src/drl_local_planner_forks
 RUN cd /usr/catkin_ws/src/drl_local_planner_forks && \
-    git clone https://github.com/Steplerchik/flatland.git flatland --branch pedsim_integration && \
-    git clone https://github.com/Steplerchik/pedsim_ros.git pedsim --branch RGring-rl_features && \
-    git clone https://github.com/RGring/navigation.git navigation --branch flatland_integration && \
-    git clone https://github.com/Steplerchik/stable-baselines.git stable-baselines --branch added_1d_conv_layer && \
-    /venv_p3/bin/pip install -e /usr/catkin_ws/src/drl_local_planner_forks/stable-baselines
+   git clone https://github.com/Steplerchik/flatland.git flatland --branch feature/noetic && \
+   git clone https://github.com/Steplerchik/pedsim_ros.git pedsim --branch RGring-rl_features && \
+   git clone https://github.com/RGring/navigation.git navigation --branch flatland_integration
+#    git clone https://github.com/Steplerchik/stable-baselines.git stable-baselines --branch added_1d_conv_layer && \
+#    /venv_p3/bin/pip install -e /usr/catkin_ws/src/drl_local_planner_forks/stable-baselines
