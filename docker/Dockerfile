@@ -1,11 +1,19 @@
 FROM osrf/ros:noetic-desktop-full-focal
 
+
+# ENV ROS_PYTHON_VERSION=3
+
 # Install libs
 RUN apt-get update && apt-get install -y \
     libopencv-dev \
     liblua5.2-dev \
     virtualenv \
     screen \
+    libpython3-dev \
+    python3-rosdep \
+    python3-rosinstall-generator \
+    python3-vcstool \
+    build-essential \
     python3-dev \
     git \
     ssh \
@@ -20,6 +28,17 @@ RUN apt-get update && apt-get install -y \
     ros-noetic-gazebo-ros
 
 WORKDIR /usr
+
+# RUN apt-get update && \
+#     apt-get install -y --no-install-recommends \
+#     libpython3-dev \
+#     python3-rosdep \
+#     python3-rosinstall-generator \
+#     python3-vcstool \
+#     build-essential && \
+#     rosdep init && \
+#     rosdep update && 
+#     rm -rf /var/lib/apt/lists/*
 
 #Creating virtualenv for python3
 RUN virtualenv /venv_p3 --python=python3

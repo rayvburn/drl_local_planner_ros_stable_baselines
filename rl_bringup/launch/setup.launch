@@ -38,10 +38,10 @@
             <remap from="/clock" to="/$(arg ns)/clock"/>
         </node>	
 
-        <node pkg="rl_local_planner" type="wp_generator" name="wp_generator" output="screen">
+        <!--node pkg="rl_local_planner" type="wp_generator" name="wp_generator" output="screen">
             <remap from="/tf" to="/$(arg ns)/tf"/>
             <remap from="/clock" to="/$(arg ns)/clock"/>
-        </node>	
+        </node-->	
 
         <node pkg="rl_agent" type="tf_python" name="tf_python" output="screen">
             <remap from="/tf" to="/$(arg ns)/tf"/>
