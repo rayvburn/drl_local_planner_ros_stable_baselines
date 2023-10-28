@@ -41,7 +41,7 @@ namespace rl_local_planner {
        * @param tf A pointer to a transform listener
        * @param costmap The cost map to use for assigning costs to trajectories
        */
-      void initialize(std::string name, tf::TransformListener* tf, costmap_2d::Costmap2DROS* costmap_ros);
+      void initialize(std::string name, tf2_ros::Buffer* tf, costmap_2d::Costmap2DROS* costmap_ros);
 
       /**
        * @brief  Check if the goal pose has been achieved
@@ -66,8 +66,8 @@ namespace rl_local_planner {
       ros::NodeHandle nh_;
     private:
       // Class variables
-      tf::TransformListener* tf_;
-      tf::Vector3 original_goal_;                             // goal of global plan
+      tf2_ros::Buffer* tf_;
+      tf2::Vector3 original_goal_;                             // goal of global plan
       geometry_msgs::Twist action_;                           // most recent action
       std::string path_frame_;                                // name of path frame           
       std::string robot_frame_;                               // name of robot frame

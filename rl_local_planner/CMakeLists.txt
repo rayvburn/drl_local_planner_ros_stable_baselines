@@ -6,7 +6,9 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   base_local_planner
-  tf
+  tf2
+  tf2_ros
+  tf2_geometry_msgs
   sensor_msgs
   nav_msgs
   nav_core
@@ -45,7 +47,9 @@ catkin_package(
     nav_core
     roscpp
     std_msgs
-    tf
+    tf2
+    tf2_ros
+    tf2_geometry_msgs
     laser_geometry
     geometry_msgs
     rl_msgs

@@ -8,6 +8,7 @@
 #include <pluginlib/class_list_macros.h>
 #include <rl_local_planner/rl_local_planner.h>
 
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
 PLUGINLIB_EXPORT_CLASS(rl_local_planner::RLLocalPlanner, nav_core::BaseLocalPlanner)
 namespace rl_local_planner {
@@ -16,7 +17,7 @@ namespace rl_local_planner {
 
 	}//RLLocalPlanner
 
-	void RLLocalPlanner::initialize(std::string name, tf::TransformListener* tf,
+	void RLLocalPlanner::initialize(std::string name, tf2_ros::Buffer* tf,
 		costmap_2d::Costmap2DROS* costmap_ros){
 
 		// params
@@ -48,17 +49,20 @@ namespace rl_local_planner {
 
    	bool RLLocalPlanner::isGoalReached(){
 
-		tf::StampedTransform transform;
+		geometry_msgs::TransformStamped transform;
 		try{
-		tf_->lookupTransform(robot_frame_, path_frame_,  
-								ros::Time(0), transform);
+		transform = tf_->lookupTransform(robot_frame_, path_frame_, ros::Time(0));
 		}
-		catch (tf::TransformException ex){
+		catch (tf2::TransformException ex){
 			ROS_ERROR("%s",ex.what());
 			ros::Duration(1.0).sleep();
 		}
 
-		tf::Vector3 original_goal_transformed = transform * original_goal_;
+		// cannot transform tf2::Vector3 directly
+		geometry_msgs::Vector3 original_goal_transformed_geom;
+		tf2::doTransform(tf2::toMsg(original_goal_), original_goal_transformed_geom, transform);
+		tf2::Vector3 original_goal_transformed;
+		tf2::fromMsg(original_goal_transformed_geom, original_goal_transformed);
 
 		if(metric_dist(original_goal_transformed.getX(), original_goal_transformed.getY()) < goal_threshold_)
 			return true;
@@ -80,7 +84,7 @@ namespace rl_local_planner {
 			return false;
 		}
 		geometry_msgs::PoseStamped original_goal = orig_plan.back();
-		original_goal_ = tf::Vector3(original_goal.pose.position.x,
+		original_goal_ = tf2::Vector3(original_goal.pose.position.x,
 							original_goal.pose.position.y,
 							0.);
 		path_frame_ = original_goal.header.frame_id;
