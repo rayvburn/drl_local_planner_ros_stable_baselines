@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   message_generation
   geometry_msgs
+  rl_msgs
 )
 
 find_package(PCL REQUIRED)
@@ -40,6 +41,7 @@ catkin_package(
     tf
     laser_geometry
     geometry_msgs
+    rl_msgs
     message_runtime
     nav_msgs
   DEPENDS

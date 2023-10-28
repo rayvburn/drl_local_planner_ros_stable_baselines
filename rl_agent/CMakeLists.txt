@@ -14,6 +14,7 @@ project(rl_agent)
     sensor_msgs 
     laser_geometry
     geometry_msgs
+    pedsim_msgs
     nav_msgs
     rl_msgs
     tf
@@ -34,6 +35,7 @@ project(rl_agent)
    rl_msgs 
    sensor_msgs 
    geometry_msgs
+   pedsim_msgs
   )
 
   include_directories(
