@@ -250,7 +250,6 @@ docker build -t ros-drl_local_planner .
         ros-drl_local_planner
     ```
 
+## Fork information
 
-
-    
-    
+This fork is prepared to run local trajectory planning locally (without `Docker`).
