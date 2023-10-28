@@ -18,6 +18,12 @@ find_package(catkin REQUIRED COMPONENTS
   pcl_ros
 )
 
+# see here: https://github.com/PointCloudLibrary/pcl/issues/3680
+# when this is fixed, we can remove the following 3 lines.
+if(NOT DEFINED CMAKE_SUPPRESS_DEVELOPER_WARNINGS)
+     set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS 1 CACHE INTERNAL "No dev warnings")
+endif()
+
 find_package(PCL REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system)
