@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   geometry_msgs
   rl_msgs
+  pcl_ros
 )
 
 find_package(PCL REQUIRED)
@@ -44,6 +45,7 @@ catkin_package(
     rl_msgs
     message_runtime
     nav_msgs
+    pcl_ros
   DEPENDS
     EIGEN3
 )
@@ -101,6 +103,7 @@ add_dependencies(image_generator
 
 target_link_libraries(image_generator
   ${catkin_LIBRARIES}
+  ${PCL_LIBRARIES}
 )
 
 
