@@ -1,16 +1,16 @@
 # With ROS Melodic, this file must have a valid name before .rosinstall extension
 - git:
     local-name: drl_local_planner_forks/flatland
-    uri: https://github.com/RGring/flatland.git
-    version: pedsim_integration
+    uri: https://github.com/rayvburn/flatland_drl_local_planner.git
+    version: pedsim_integration_customized
 - git:
     local-name: drl_local_planner_forks/pedsim
     uri: https://github.com/RGring/pedsim_ros.git
     version: rl_features
 - git:
     local-name: drl_local_planner_forks/navigation
-    uri: https://github.com/RGring/navigation.git
-    version: flatland_integration
+    uri: https://github.com/rayvburn/navigation_flatland.git
+    version: flatland_integration_customized
 - git:
     local-name: drl_local_planner_forks/stable-baselines
     uri: https://github.com/RGring/stable-baselines.git
