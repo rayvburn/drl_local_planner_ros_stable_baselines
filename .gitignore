@@ -3,3 +3,6 @@
 *.idea*
 *.pyc
 *screenlog*
+
+# virtual environment for Python modules
+.venv/
