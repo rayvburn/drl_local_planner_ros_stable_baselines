@@ -1,3 +1,4 @@
+# With ROS Melodic, this file must have a valid name before .rosinstall extension
 - git:
     local-name: drl_local_planner_forks/flatland
     uri: https://github.com/RGring/flatland.git
