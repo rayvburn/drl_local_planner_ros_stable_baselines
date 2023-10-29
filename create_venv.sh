@@ -10,4 +10,8 @@ source .venv/bin/activate
 
 pip3 install -r requirements.txt
 
+# prepare rl_agent sources
+cd $SCRIPT_DIR/rl_agent
+python setup.py install
+
 deactivate
