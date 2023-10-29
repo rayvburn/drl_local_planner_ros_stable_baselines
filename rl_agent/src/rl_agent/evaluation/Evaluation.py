@@ -262,7 +262,7 @@ class Evaluation():
         for i, agent_state in enumerate(agent_states):
             marker_array.markers.append(Marker())
             marker_array.markers[i*3] = Marker()
-            marker_array.markers[i*3].header.frame_id = "/map"
+            marker_array.markers[i*3].header.frame_id = "map"
             marker_array.markers[i*3].id = i*3
             marker_array.markers[i*3].action = 0
             marker_array.markers[i*3].type = 0
@@ -283,7 +283,7 @@ class Evaluation():
             marker_array.markers[i*3].points.append(end_point)
 
             marker_array.markers.append(Marker())
-            marker_array.markers[i*3+1].header.frame_id = "/map"
+            marker_array.markers[i*3+1].header.frame_id = "map"
             marker_array.markers[i*3+1].id = i*3+1
             marker_array.markers[i*3+1].action = 0
             marker_array.markers[i*3+1].type = 2
@@ -298,7 +298,7 @@ class Evaluation():
 
             lookahead = 100
             marker_array.markers.append(Marker())
-            marker_array.markers[i*3+2].header.frame_id = "/map"
+            marker_array.markers[i*3+2].header.frame_id = "map"
             marker_array.markers[i*3+2].id = i*3+2
             marker_array.markers[i*3+2].action = 0
             marker_array.markers[i*3+2].type = 4
