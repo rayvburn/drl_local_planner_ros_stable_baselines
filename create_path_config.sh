@@ -53,3 +53,9 @@ cat > "$DEVEL_DIR/.gitignore" <<EOF
 # this is a devel directory created by the create_path_config.sh script
 **
 EOF
+
+# copy the example agents
+mkdir -p $(realpath $DEVEL_DIR)/agents
+cp -R \
+    "$SCRIPT_DIR/example_agents/." \
+    "$(realpath $DEVEL_DIR)/agents"
