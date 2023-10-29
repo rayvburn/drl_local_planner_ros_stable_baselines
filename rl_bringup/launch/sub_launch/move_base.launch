@@ -1,7 +1,7 @@
 <launch>
 	<arg name="ns"/>
 
-   <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+   <node pkg="move_base_flatland" type="move_base_flatland" respawn="false" name="move_base" output="screen">
     <rosparam file="$(find rl_bringup)/config/costmap_common_params.yaml" command="load" ns="global_costmap" />
     <rosparam file="$(find rl_bringup)/config/costmap_common_params.yaml" command="load" ns="local_costmap" />
     <rosparam file="$(find rl_bringup)/config/local_costmap_params.yaml" command="load" />
