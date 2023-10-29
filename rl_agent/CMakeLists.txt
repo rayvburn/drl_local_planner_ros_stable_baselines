@@ -23,6 +23,11 @@ project(rl_agent)
 
   find_package(PCL REQUIRED)
 
+  # Create virtualenv
+  set(CREATE_VENV_CMD "${CMAKE_CURRENT_SOURCE_DIR}/../create_venv.sh")
+  MESSAGE("Executing script creating the virtualenv for Python modules: '${CREATE_VENV_CMD}'")
+  execute_process(COMMAND ${CREATE_VENV_CMD})
+
   catkin_python_setup()
 
 
