@@ -1,6 +1,8 @@
  /*
  * @name	 	  toggle_setup_init.cpp
  * @brief	 	  Simulation will be triggered for n_sec for initialize setup.
+ * @details   Then, a customized move_base (https://github.com/rayvburn/navigation_flatland) is expected to orchestrate
+ *            simulation steps.
  * @author  	Ronja Gueldenring
  * @date 		  2019/04/05
  **/
