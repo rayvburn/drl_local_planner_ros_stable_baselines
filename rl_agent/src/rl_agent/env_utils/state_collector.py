@@ -124,6 +124,22 @@ class StateCollector():
                 # print("img service call: %f" % (time.time() - start))
             else:
                 self.__img = []
+            if not len(merged_scan.ranges):
+                rospy.logerr(
+                    "State collector is in the '"
+                    + str(self.__mode)
+                    + "' mode and will return an ill-formed merged scan with "
+                    + str(len(merged_scan.ranges))
+                    + " elements. It is created from a 'static' scan ('"
+                    + str(self.static_scan_sub_.resolved_name)
+                    + "' topic) with "
+                    + str(len(static_scan_msg.ranges))
+                    + " elements and a 'ped' scan ('"
+                    + str(self.ped_scan_sub_.resolved_name)
+                    + "' topic) with "
+                    + str(len(ped_scan_msg.ranges))
+                    + " elements"
+                )
             return static_scan_msg, ped_scan_msg, merged_scan, self.__img, wp_cp, self.__twist, self.__goal
         else:
             scans = []
@@ -131,6 +147,22 @@ class StateCollector():
             scans.append(self.__b_scan)
             resp = self.__merge_scans(scans)
             merged_scan = resp.merged_scan
+            if not len(merged_scan.ranges):
+                rospy.logerr(
+                    "State collector is in the '"
+                    + str(self.__mode)
+                    + "' mode and will return an ill-formed merged scan with "
+                    + str(len(merged_scan.ranges))
+                    + " elements. It is created from a 'front' scan ('"
+                    + str(self.static_front_scan_sub_.resolved_name)
+                    + "' topic) with "
+                    + str(len(self.__f_scan.ranges))
+                    + " elements and a 'rear' scan ('"
+                    + str(self.static_rear_scan_sub_.resolved_name)
+                    + "' topic) with "
+                    + str(len(self.__b_scan.ranges))
+                    + " elements"
+                )
             wp_cp = copy.deepcopy(self.__wps)
             self.__wps.is_new.data = False
             if (self.__state_mode == 0):
