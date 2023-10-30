@@ -37,6 +37,8 @@ namespace rl_agent {
       ros::Publisher transformed_goal_pub_;
       tf::TransformListener listener_;
 
+      std::string robot_frame_;
+
   };
 };
 #endif /* TF_PYTHON_H */

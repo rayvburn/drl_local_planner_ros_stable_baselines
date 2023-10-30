@@ -14,6 +14,7 @@ namespace rl_agent {
 	TFPython::TFPython(const ros::NodeHandle& node_handle): nh_(node_handle){
         goal_sub_ = nh_.subscribe("move_base_simple/goal", 1, &TFPython::goal_callback, this);
         transformed_goal_pub_ = nh_.advertise<geometry_msgs::PoseStamped>("rl_agent/robot_to_goal", 1, false);
+        nh_.getParam("rl_agent/robot_frame", robot_frame_);
     }
 
 	/**
@@ -27,7 +28,7 @@ namespace rl_agent {
         }
         tf::StampedTransform rob_to_map;
 		try{
-		listener_.lookupTransform("base_footprint", goal_.header.frame_id,  
+		listener_.lookupTransform(robot_frame_, goal_.header.frame_id,
 								ros::Time(0), rob_to_map);
 		}
 		catch (tf::TransformException ex){
@@ -43,7 +44,7 @@ namespace rl_agent {
 
         geometry_msgs::PoseStamped msg;
         msg.header.stamp = ros::Time::now();
-        msg.header.frame_id = "base_footprint";
+        msg.header.frame_id = robot_frame_;
         tf::poseTFToMsg(rob_to_goal, msg.pose);
         transformed_goal_pub_.publish(msg);
         return;
