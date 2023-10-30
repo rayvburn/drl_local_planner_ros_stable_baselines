@@ -39,7 +39,15 @@ class RosEnvRaw(RosEnvAbs):
         state = np.ones(self.STATE_SIZE, dtype=np.float)
 
         # add laserscan
-        state[0, 0:self.__scan_size, 0] = self.merged_scan_.ranges
+        if len(self.merged_scan_.ranges) == self.__scan_size:
+            state[0, 0:self.__scan_size, 0] = self.merged_scan_.ranges
+        else:
+            rospy.logerr(
+                "Could not properly fill the state for the rl-agent. The collected merged scan has "
+                + str(len(self.merged_scan_.ranges))
+                + " elements, whereas it is expected to have "
+                + str(self.__scan_size)
+            )
 
         # add goal position
         wp_index = self.STATE_SIZE[1] - num_of_wps * 2
