@@ -24,7 +24,7 @@ class RosEnvRawScanPrepWp(RosEnvAbs):
     def __init__(self, ns, state_collector, execution_mode, task_mode, state_size, observation_space, stack_offset, action_size, action_space, debug, goal_radius, wp_radius, robot_radius, reward_fnc):
         state_collector.set_state_mode(2)
         super(RosEnvRawScanPrepWp, self).__init__(ns, state_collector, execution_mode, task_mode, state_size, observation_space, stack_offset, action_size, action_space, debug, goal_radius, wp_radius, robot_radius, reward_fnc)
-        self.__res = rospy.get_param("%s/rl_agent/resolution"%ns)
+        self.__res = rospy.get_param("%s/rl_agent/scan_resolution"%ns)
 
     def get_observation_(self):
         """

@@ -8,4 +8,4 @@ rl_agent:
   # number of height cells in negative direction
   img_height: 70 
   # resolution in m/cell
-  resolution: 0.15
+  img_resolution: 0.15

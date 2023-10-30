@@ -16,7 +16,7 @@ namespace rl_image_generator {
         nh_.getParam("rl_agent/img_width_pos", img_width_pos_);
         nh_.getParam("rl_agent/img_width_neg", img_width_neg_);
         nh_.getParam("rl_agent/img_height", img_height_);
-        nh_.getParam("rl_agent/resolution", resolution_);
+        nh_.getParam("rl_agent/img_resolution", resolution_);
         nh_.getParam("rl_agent/robot_frame", robot_frame_);
 
         //Services
