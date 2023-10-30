@@ -26,7 +26,7 @@ namespace rl_local_planner {
 		// getting params from param server
 		nh_.getParam("rl_agent/robot_frame", robot_frame_);
 		nh_.getParam("rl_agent/train_mode", rl_mode_);
-		nh_.getParam("rl_agent/goal_theshold", goal_threshold_);
+		nh_.getParam("rl_agent/goal_threshold", goal_threshold_);
 		
 		// initializing class variables
 		if (rl_mode_ == 1)
