@@ -138,18 +138,22 @@ if __name__ == '__main__':
 
     # for running from terminal (e.g. launch-file)
     if (len(sys.argv) > 1):
-        ns = "sim1"
-        sc = StateCollector(ns, str(sys.argv[3]))
+        # handle special case (global namespace requested)
+        ns = str(sys.argv[1])
+        if ns == "/":
+            ns = ""
+
+        sc = StateCollector(ns, str(sys.argv[4]))
         run_ppo(config, sc,
                  ns=ns,
-                 agent_name=str(sys.argv[1]),
-                 policy=str(sys.argv[2]),
-                 mode=str(sys.argv[3]),
-                 debug=bool(int(sys.argv[4])),
-                 normalize=bool(int(sys.argv[5])),
-                 disc_action_space=bool(int(sys.argv[6])),
-                 task_mode=str(sys.argv[7]),
-                 num_stacks=int(sys.argv[8]))
+                 agent_name=str(sys.argv[2]),
+                 policy=str(sys.argv[3]),
+                 mode=str(sys.argv[4]),
+                 debug=bool(int(sys.argv[5])),
+                 normalize=bool(int(sys.argv[6])),
+                 disc_action_space=bool(int(sys.argv[7])),
+                 task_mode=str(sys.argv[8]),
+                 num_stacks=int(sys.argv[9]))
 
 
     # for quick testing

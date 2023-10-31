@@ -1,6 +1,7 @@
 <launch>
   <arg name="mode" />
+  <arg name="ns" default="/" />
   <node pkg="rl_agent" type="run_ppo.py" name="ppo_runner" output="screen"
-    args="ppo2_foo CNN1DPolicy_multi_input $(arg mode) 1 0 0 ped 3"
+    args="$(arg ns) ppo2_foo CNN1DPolicy_multi_input $(arg mode) 1 0 0 ped 3"
   />
 </launch>

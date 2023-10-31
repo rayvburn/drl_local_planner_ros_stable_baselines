@@ -91,10 +91,12 @@ class RosEnvAbs(gym.Env):
             self.__task_generator = TaskGenerator(self.NS, self.__state_collector, self.ROBOT_RADIUS)
 
         # Subscriber
-        self.__trigger_sub = rospy.Subscriber("%s/trigger_agent" % (self.NS), Bool, self.__trigger_callback)
+        trigger_agent_topic = rospy.get_param("%s/rl_agent/trigger_agent_topic" % (self.NS), "%s/trigger_agent" % (self.NS))
+        self.__trigger_sub = rospy.Subscriber(trigger_agent_topic, Bool, self.__trigger_callback)
 
         # Publisher
-        self.__agent_action_pub = rospy.Publisher('%s/rl_agent/action' % (self.NS), Twist, queue_size=1)
+        action_topic = rospy.get_param("%s/rl_agent/action_topic" % (self.NS), "%s/rl_agent/action" % (self.NS))
+        self.__agent_action_pub = rospy.Publisher(action_topic, Twist, queue_size=1)
 
         # Sleeping so that py-Publisher has time to setup!
         time.sleep(2)

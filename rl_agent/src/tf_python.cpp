@@ -12,8 +12,14 @@
 namespace rl_agent {
 
 	TFPython::TFPython(const ros::NodeHandle& node_handle): nh_(node_handle){
-        goal_sub_ = nh_.subscribe("move_base_simple/goal", 1, &TFPython::goal_callback, this);
-        transformed_goal_pub_ = nh_.advertise<geometry_msgs::PoseStamped>("rl_agent/robot_to_goal", 1, false);
+        std::string goal_topic = "move_base_simple/goal";
+        std::string transformed_goal_topic = "rl_agent/robot_to_goal";
+        nh_.param("rl_agent/goal_topic", goal_topic, goal_topic);
+        nh_.param("rl_agent/transformed_goal_topic", transformed_goal_topic, transformed_goal_topic);
+
+        goal_sub_ = nh_.subscribe(goal_topic, 1, &TFPython::goal_callback, this);
+        transformed_goal_pub_ = nh_.advertise<geometry_msgs::PoseStamped>(transformed_goal_topic, 1, false);
+
         nh_.getParam("rl_agent/robot_frame", robot_frame_);
     }
 

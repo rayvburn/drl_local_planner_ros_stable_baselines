@@ -21,6 +21,7 @@ namespace rl_image_generator {
 
         //Services
         std::string img_service_name_ = ros::this_node::getName() + "/get_image";
+        nh_.param("rl_agent/state_image_generation_srv_name", img_service_name_, img_service_name_);
         get_image_service_ = nh_.advertiseService(img_service_name_, &ImageGenerator::get_img_callback_, this);
 	}
 

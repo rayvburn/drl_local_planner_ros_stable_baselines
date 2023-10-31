@@ -28,6 +28,15 @@ namespace rl_local_planner {
 		nh_.getParam("rl_agent/train_mode", rl_mode_);
 		nh_.getParam("rl_agent/goal_threshold", goal_threshold_);
 		
+		std::string action_topic = "rl_agent/action";
+		std::string done_topic = "rl_agent/done";
+		std::string trigger_agent_topic = "trigger_agent";
+		std::string set_path_service_name = ros::this_node::getNamespace() + "/wp_generator/set_gobal_plan";
+		nh_.param("rl_agent/action_topic", action_topic, action_topic);
+		nh_.param("rl_agent/done_topic", done_topic, done_topic);
+		nh_.param("rl_agent/trigger_agent_topic", trigger_agent_topic, trigger_agent_topic);
+		nh_.param("rl_agent/wp_generator_path_srv", set_path_service_name, set_path_service_name);
+
 		// initializing class variables
 		if (rl_mode_ == 1)
 			goal_threshold_ = 0.0;
@@ -36,14 +45,13 @@ namespace rl_local_planner {
 		done_ = false;
 
 		// Subscriber
-		agent_action_sub_ = nh_.subscribe("rl_agent/action", 1, &RLLocalPlanner::agent_action_callback_, this);
-		done_sub_ = nh_.subscribe("rl_agent/done", 1, &RLLocalPlanner::done_callback_, this);
+		agent_action_sub_ = nh_.subscribe(action_topic, 1, &RLLocalPlanner::agent_action_callback_, this);
+		done_sub_ = nh_.subscribe(done_topic, 1, &RLLocalPlanner::done_callback_, this);
 		
 		//Publisher
-		trigger_agent_pub = nh_.advertise<std_msgs::Bool>("trigger_agent", 1, false);
+		trigger_agent_pub = nh_.advertise<std_msgs::Bool>(trigger_agent_topic, 1, false);
 		
 		// Services
-		std::string set_path_service_name = ros::this_node::getNamespace() + "/wp_generator/set_gobal_plan";
 		set_path_service_ = nh_.serviceClient<rl_msgs::SetPath>(set_path_service_name);
 	} //initialize
 

@@ -32,6 +32,8 @@ class DebugRosEnv():
         print("stack_offset: %d"%self.__stack_offset)
         self.__input_images = deque(maxlen=4 * self.__stack_offset)
 
+        self.__robot_base_frame = rospy.get_param("%s/rl_agent/robot_frame" % (self.__ns), "base_footprint")
+
         #Input state
         self.__input_img_pub1 = rospy.Publisher('%s/state_image1' % (self.__ns), Image, queue_size=1)
         self.__input_img_pub2 = rospy.Publisher('%s/state_image2' % (self.__ns), Image, queue_size=1)
@@ -91,7 +93,7 @@ class DebugRosEnv():
         :param data: input state
         """
         msg = Image()
-        msg.header.frame_id = "/base_footprint"
+        msg.header.frame_id = self.__robot_base_frame
         msg.height = data.shape[1]
         msg.width = data.shape[0]
         msg.encoding = "mono8"
@@ -128,7 +130,7 @@ class DebugRosEnv():
         """
         # Publish reward as Marker
         msg = Marker()
-        msg.header.frame_id = "/base_footprint"
+        msg.header.frame_id = self.__robot_base_frame
         msg.ns = ""
         msg.id = 0
         msg.type = msg.TEXT_VIEW_FACING

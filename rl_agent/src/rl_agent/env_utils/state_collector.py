@@ -32,9 +32,7 @@ class StateCollector():
         self.__static_scan = LaserScan()        # Laserscan only contains static objects
         self.__ped_scan = LaserScan()           # Laserscan only contains pedestrians
         self.__f_scan = LaserScan()
-        self.__f_scan.header.frame_id = "base_footprint"
         self.__b_scan = LaserScan()
-        self.__b_scan.header.frame_id = "base_footprint"
 
         self.__img = OccupancyGrid()            # input image
         self.__wps= Waypoint()                  # most recent Waypoints
@@ -44,34 +42,51 @@ class StateCollector():
                                                 # 1, if stacked image representation in same frame
                                                 # 2, if scan as input state representation
 
+        self.__robot_base_frame = rospy.get_param("%s/rl_agent/robot_frame" % (self.__ns), "base_footprint")
+        self.__f_scan.header.frame_id = self.__robot_base_frame
+        self.__b_scan.header.frame_id = self.__robot_base_frame
 
+        # prepare list of topics to subscribe (default values taken from the original implementation)
+        waypoint_topic = rospy.get_param("%s/rl_agent/waypoint_topic" % (self.__ns), "%s/wp" % (self.__ns))
+        waypoint_reached_topic = rospy.get_param("%s/rl_agent/waypoint_reached_topic" % (self.__ns), "%s/wp_reached" % (self.__ns))
+        scan_static_obs_topic = rospy.get_param("%s/rl_agent/train/laserscan_static_obstacles_topic" % (self.__ns), "%s/static_laser" % (self.__ns))
+        scan_pedestrians_topic = rospy.get_param("%s/rl_agent/train/laserscan_pedestrians_topic" % (self.__ns), "%s/ped_laser" % (self.__ns))
+        twist_topic = rospy.get_param("%s/rl_agent/train/twist_topic" % (self.__ns), "%s/twist" % (self.__ns))
+        robot_to_goal_topic = rospy.get_param("%s/rl_agent/transformed_goal_topic" % (self.__ns), "%s/rl_agent/robot_to_goal" % (self.__ns))
+        scan_rear_topic = rospy.get_param("%s/rl_agent/execution/scan_rear_topic" % (self.__ns), "%s/b_scan" % (self.__ns))
+        scan_front_topic = rospy.get_param("%s/rl_agent/execution/scan_front_topic" % (self.__ns), "%s/f_scan" % (self.__ns))
 
         # Subscriber
-        self.wp_sub_ = rospy.Subscriber("%s/wp" % (self.__ns), Waypoint, self.__wp_callback, queue_size=1)
+        self.wp_sub_ = rospy.Subscriber(waypoint_topic, Waypoint, self.__wp_callback, queue_size=1)
 
         if ["train", "eval"].__contains__(self.__mode):
             # Info only avaible during evaluation and training
-            self.wp_sub_reached_ = rospy.Subscriber("%s/wp_reached" % (self.__ns), Waypoint, self.__wp_reached_callback, queue_size=1)
+            self.wp_sub_reached_ = rospy.Subscriber(waypoint_reached_topic, Waypoint, self.__wp_reached_callback, queue_size=1)
 
-            self.static_scan_sub_ = rospy.Subscriber("%s/static_laser" % (self.__ns), LaserScan, self.__static_scan_callback,
+            self.static_scan_sub_ = rospy.Subscriber(scan_static_obs_topic, LaserScan, self.__static_scan_callback,
                                                      queue_size=1)
 
-            self.ped_scan_sub_ = rospy.Subscriber("%s/ped_laser" % (self.__ns), LaserScan, self.__ped_scan_callback,
+            self.ped_scan_sub_ = rospy.Subscriber(scan_pedestrians_topic, LaserScan, self.__ped_scan_callback,
                                                   queue_size=1)
-            self.twist_sub_ = rospy.Subscriber("%s/twist" % (self.__ns), TwistStamped, self.__twist_callback, queue_size=1)
-            self.goal_sub_ = rospy.Subscriber("%s/rl_agent/robot_to_goal" % (self.__ns), PoseStamped, self.__goal_callback, queue_size=1)
+            self.twist_sub_ = rospy.Subscriber(twist_topic, TwistStamped, self.__twist_callback, queue_size=1)
+            self.goal_sub_ = rospy.Subscriber(robot_to_goal_topic, PoseStamped, self.__goal_callback, queue_size=1)
         else:
-            self.static_scan_sub_ = rospy.Subscriber("%s/b_scan" % (self.__ns), LaserScan,
+            self.static_rear_scan_sub_ = rospy.Subscriber(scan_rear_topic, LaserScan,
                                                      self.__b_scan_callback,
                                                      queue_size=1)
-            self.static_scan_sub_ = rospy.Subscriber("%s/f_scan" % (self.__ns), LaserScan,
+            self.static_front_scan_sub_ = rospy.Subscriber(scan_front_topic, LaserScan,
                                                      self.__f_scan_callback,
                                                      queue_size=1)
 
         # Service
-        self.__img_srv = rospy.ServiceProxy('%s/image_generator/get_image' % (self.__ns), StateImageGenerationSrv)
-        self.__sim_in_step = rospy.ServiceProxy('%s/is_in_step' % (self.__ns), SetBool)
-        self.__merge_scans = rospy.ServiceProxy('%s/merge_scans' % (self.__ns), MergeScans)
+        image_srv_name = rospy.get_param("%s/rl_agent/state_image_generation_srv_name" % (self.__ns), '%s/image_generator/get_image' % (self.__ns))
+        merge_scans_srv_name = rospy.get_param("%s/rl_agent/merge_scans_srv_name" % (self.__ns), '%s/merge_scans' % (self.__ns))
+
+        self.__img_srv = rospy.ServiceProxy(image_srv_name, StateImageGenerationSrv)
+        self.__merge_scans = rospy.ServiceProxy(merge_scans_srv_name, MergeScans)
+
+        # (legacy) See the "Fully synchronized" note in the get_state
+        # self.__sim_in_step = rospy.ServiceProxy('%s/is_in_step' % (self.__ns), SetBool)
 
     def get_state(self):
         """
@@ -102,7 +117,7 @@ class StateCollector():
 
             # start = time.time()
             merged_scan = LaserScan()
-            merged_scan.header.frame_id = "base_footprint"
+            merged_scan.header.frame_id = self.__robot_base_frame
             merged_scan.header.stamp = static_scan_msg.header.stamp
             merged_scan.ranges = np.minimum(static_scan_msg.ranges, ped_scan_msg.ranges)
             merged_scan.range_max = static_scan_msg.range_max

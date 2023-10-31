@@ -10,8 +10,10 @@
 namespace rl_agent {
 
 	LaserScanMerger::LaserScanMerger(const ros::NodeHandle& node_handle): nh_(node_handle){
-		std::string merge_service_name_ = ros::this_node::getName() + "/merge_scans";
-        merge_service_ = nh_.advertiseService("merge_scans", &LaserScanMerger::merge_scan_callback, this);
+		std::string merge_service_name_ = "merge_scans";
+		nh_.param("rl_agent/merge_scans_srv_name", merge_service_name_, merge_service_name_);
+        merge_service_ = nh_.advertiseService(merge_service_name_, &LaserScanMerger::merge_scan_callback, this);
+
         nh_.getParam("rl_agent/robot_frame", robot_frame_);
 		min_height_ = 0.0;
 		max_height_ = 0.25;

@@ -21,11 +21,16 @@ namespace rl_local_planner {
 
 		// Services
 		std::string global_plan_service_name = ros::this_node::getName() + "/set_gobal_plan";
+		nh_.param("rl_agent/wp_generator_path_srv", global_plan_service_name, global_plan_service_name);
 		set_path_service = nh_.advertiseService(global_plan_service_name, &WpGenerator::path_callback_, this);
-        
+
 		//Publisher
-		wp_pub_ = nh_.advertise<rl_msgs::Waypoint>("wp", 1, true);
-		wp_reached_pub_ = nh_.advertise<rl_msgs::Waypoint>("wp_reached", 1, true);
+		std::string wp_topic = "wp";
+		std::string wp_reached_topic = "wp_reached";
+		nh_.param("rl_agent/waypoint_topic", wp_topic, wp_topic);
+		nh_.param("rl_agent/waypoint_reached_topic", wp_reached_topic, wp_reached_topic);
+		wp_pub_ = nh_.advertise<rl_msgs::Waypoint>(wp_topic, 1, true);
+		wp_reached_pub_ = nh_.advertise<rl_msgs::Waypoint>(wp_reached_topic, 1, true);
 	}
 
 	bool WpGenerator::path_callback_(rl_msgs::SetPath::Request& request, rl_msgs::SetPath::Response& response){
