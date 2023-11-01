@@ -155,6 +155,19 @@ class StateCollector():
                     + str(len(ped_scan_msg.ranges))
                     + " elements"
                 )
+
+            if not len(self.__wps.points):
+                rospy.logerr(
+                    "State collector is in the '"
+                    + str(self.__mode)
+                    + "' mode and will return an ill-formed waypoints list with "
+                    + str(len(self.__wps.points))
+                    + " elements received from '"
+                    + str(self.wp_sub_.resolved_name)
+                    + "' and '"
+                    + str(+ str(self.wp_sub_reached_.resolved_name))
+                    + "' topics"
+                )
             return static_scan_msg, ped_scan_msg, merged_scan, self.__img, wp_cp, self.__twist, self.__goal
         else:
             scans = []
@@ -185,6 +198,17 @@ class StateCollector():
                 self.__img = resp.img
             else:
                 self.__img = []
+
+            if not len(self.__wps.points):
+                rospy.logerr(
+                    "State collector is in the '"
+                    + str(self.__mode)
+                    + "' mode and will return an ill-formed waypoints list with "
+                    + str(len(self.__wps.points))
+                    + " elements received from '"
+                    + str(self.wp_sub_.resolved_name)
+                    + "' topic"
+                )
             return [], [], merged_scan, self.__img, wp_cp, self.__twist, self.__goal
 
     def get_static_scan(self):
