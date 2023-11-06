@@ -1,9 +1,6 @@
 <launch>
 	<arg name="ns"/> 
-	<!-- odom frame == map frame-->
-	<node pkg="tf2_ros" type="static_transform_publisher" name="map_odom_tf_broadcaster" args="0 0 0 0 0 0 map odom">
-		<remap from="/tf" to="/$(arg ns)/tf"/>
-		<remap from="/clock" to="/$(arg ns)/clock"/>
+	<node ns="$(arg ns)" pkg="tf2_ros" type="static_transform_publisher" name="map_odom_tf_broadcaster" args="0 0 0 0 0 0 map odom">
 	</node>
 
 </launch>

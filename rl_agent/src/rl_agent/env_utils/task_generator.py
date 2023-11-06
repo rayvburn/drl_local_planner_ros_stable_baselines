@@ -29,6 +29,7 @@ from geometry_msgs.msg import Twist, Point
 from pedsim_srvs.srv import SpawnPeds
 from pedsim_msgs.msg import Ped
 from std_srvs.srv import SetBool, Empty
+from rl_agent.common_utils import adjust_topic_name
 
 class TaskGenerator():
     """
@@ -52,7 +53,7 @@ class TaskGenerator():
         self.__path = Path()                            # global plan
         self.__static_objects = []                      # static objects that has been spawned in the most recent task
 
-        self.__ped_type = rospy.get_param("%s/rl_agent/ped_type"%ns)
+        self.__ped_type = rospy.get_param("%s/rl_agent/train/ped_type"%ns)
                                                         # 0: Pedestrians don't avoid robot
                                                         # 10: Pedestrians always avoid robot
                                                         # 11: Pedestrians avoid robot if it stands still and after reaction time.
@@ -71,6 +72,7 @@ class TaskGenerator():
         # self.__ped_file = "person_single_circle.model.yaml"
 
         # Services
+        # flatland-related
         self.__sim_step = rospy.ServiceProxy('%s/step' % self.NS, Step)
         self.__sim_pause = rospy.ServiceProxy('%s/pause' % self.NS, Empty)
         self.__sim_resume = rospy.ServiceProxy('%s/resume' % self.NS, Empty)
@@ -78,24 +80,46 @@ class TaskGenerator():
         self.__delete_model = rospy.ServiceProxy('%s/delete_model' % self.NS, DeleteModel)
         self.__spawn_model = rospy.ServiceProxy('%s/spawn_model' % self.NS, SpawnModel)
         self.__respawn_models = rospy.ServiceProxy('%s/respawn_models' % self.NS, RespawnModels)
+        # pedsim-related
         self.__spawn_ped_srv = rospy.ServiceProxy('%s/pedsim_simulator/spawn_ped' % self.NS, SpawnPeds)
         self.__respawn_peds_srv = rospy.ServiceProxy('%s/pedsim_simulator/respawn_peds' % self.NS, SpawnPeds)
         self.__remove_all_peds_srv = rospy.ServiceProxy('%s/pedsim_simulator/remove_all_peds' % self.NS, SetBool)
 
+        # Read parameters
+        nav_goal_status_topic = rospy.get_param("%s/rl_agent/train/nav_goal_status_topic" % (self.NS), "%s/move_base/status" % self.NS)
+        map_topic = rospy.get_param("%s/rl_agent/map_topic" % (self.NS), "%s/map" % self.NS)
+        global_path_topic = rospy.get_param("%s/rl_agent/train/global_path_topic" % (self.NS), "%s/move_base/NavfnROS/plan" % self.NS)
+
+        initial_pose_topic = rospy.get_param("%s/rl_agent/train/initial_pose_topic" % (self.NS), "%s/initialpose" % self.NS)
+        goal_topic = rospy.get_param("%s/rl_agent/train/goal_topic" % (self.NS), "%s/move_base_simple/goal" % self.NS)
+        cmd_vel_topic = rospy.get_param("%s/rl_agent/train/cmd_vel_topic" % (self.NS), "%s/cmd_vel" % self.NS)
+        done_topic = rospy.get_param("%s/rl_agent/done_topic" % (self.NS), "%s/rl_agent/done" % self.NS)
+        new_task_topic = rospy.get_param("%s/rl_agent/train/new_task_started_topic" % (self.NS), "%s/rl_agent/new_task_started" % self.NS)
+
+        # Adjust topic names
+        nav_goal_status_topic = adjust_topic_name(self.NS, nav_goal_status_topic)
+        map_topic = adjust_topic_name(self.NS, map_topic)
+        global_path_topic = adjust_topic_name(self.NS, global_path_topic)
+        initial_pose_topic = adjust_topic_name(self.NS, initial_pose_topic)
+        goal_topic = adjust_topic_name(self.NS, goal_topic)
+        cmd_vel_topic = adjust_topic_name(self.NS, cmd_vel_topic)
+        done_topic = adjust_topic_name(self.NS, done_topic)
+        new_task_topic = adjust_topic_name(self.NS, new_task_topic)
+
         # Subscriber
-        self.__goal_status_sub = rospy.Subscriber("%s/move_base/status" % self.NS, GoalStatusArray,
-                                                  self.__goal_status_callback, queue_size=1)
-        self.__map_sub = rospy.Subscriber("%s/map" % self.NS, OccupancyGrid, self.__map_callback)
-        self.__path_sub = rospy.Subscriber("%s/move_base/NavfnROS/plan" % self.NS, Path, self.__path_callback)
-        # self.__path_sub = rospy.Subscriber("%s/move_base/GlobalPlanner/plan" % self.NS, Path, self.__path_callback)
+        self.__goal_status_sub = rospy.Subscriber(nav_goal_status_topic, GoalStatusArray, self.__goal_status_callback, queue_size=1)
+        self.__map_sub = rospy.Subscriber(map_topic, OccupancyGrid, self.__map_callback)
+        self.__path_sub = rospy.Subscriber(global_path_topic, Path, self.__path_callback)
 
         # Publisher
-        self.__initialpose_pub = rospy.Publisher('%s/initialpose' % self.NS, PoseWithCovarianceStamped, queue_size=1)
-        self.__goal_pub_ = rospy.Publisher('%s/move_base_simple/goal' % self.NS, PoseStamped, queue_size=1)
-        self.__cmd_vel_pub = rospy.Publisher('%s/cmd_vel' % self.NS, Twist, queue_size=1)
-        self.__done_pub = rospy.Publisher('%s/rl_agent/done' % self.NS, Bool, queue_size=1)
-        self.__new_task_pub = rospy.Publisher('%s/rl_agent/new_task_started' % self.NS, Bool, queue_size=1)
-        self.__resume = rospy.ServiceProxy('%s/resume' % (self.NS), Empty)
+        self.__initialpose_pub = rospy.Publisher(initial_pose_topic, PoseWithCovarianceStamped, queue_size=1)
+        self.__goal_pub_ = rospy.Publisher(goal_topic, PoseStamped, queue_size=1)
+        self.__cmd_vel_pub = rospy.Publisher(cmd_vel_topic, Twist, queue_size=1)
+        self.__done_pub = rospy.Publisher(done_topic, Bool, queue_size=1)
+        self.__new_task_pub = rospy.Publisher(new_task_topic, Bool, queue_size=1)
+
+        # (legacy)
+        # self.__resume = rospy.ServiceProxy('%s/resume' % (self.NS), Empty)
 
         #Clear world
         self.__init_object_remove()

@@ -5,7 +5,9 @@
       <arg name="ns" default=""/>
       <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rviz_config) $(arg error_log)">
         <remap from="map" to="$(arg ns)/map"/>
+        <remap from="map_updates" to="$(arg ns)/map_updates"/>
         <remap from="rl_map" to="$(arg ns)/rl_map"/>
+        <remap from="rl_map_updates" to="$(arg ns)/rl_map_updates"/>
         <remap from="state_image1" to="$(arg ns)/state_image1"/>
         <remap from="state_image4" to="$(arg ns)/state_image4"/>
         <remap from="state_scan" to="$(arg ns)/state_scan"/>
@@ -17,6 +19,7 @@
         <remap from="move_base/current_goal" to="$(arg ns)/move_base/current_goal"/>
         <remap from="particlecloud" to="$(arg ns)/particlecloud"/>
         <remap from="/move_base/NavfnROS/plan" to="$(arg ns)/move_base/NavfnROS/plan"/>
+        <remap from="/move_base/GlobalPlanner/plan" to="$(arg ns)/move_base/GlobalPlanner/plan"/>
         <remap from="rl_eval/driven_path2" to="$(arg ns)/rl_eval/driven_path2"/>
         <remap from="rl_eval/driven_path" to="$(arg ns)/rl_eval/driven_path"/>
         <remap from="rl_eval/global_path" to="$(arg ns)/rl_eval/global_path"/>
@@ -26,6 +29,7 @@
         <remap from="wp_vis3" to="$(arg ns)/wp_vis3"/>
         <remap from="wp_vis4" to="$(arg ns)/wp_vis4"/>
         <remap from="/rl_eval/viz_agents" to="$(arg ns)//rl_eval/viz_agents"/>
+        <!-- Subscribed by the simulator that is within the global namespace -->
         <remap from="cmd_vel" to="$(arg ns)/cmd_vel"/>
         <remap from="move_base_simple/goal" to="$(arg ns)/move_base_simple/goal"/>
         <remap from="initialpose" to="$(arg ns)/initialpose"/>
@@ -54,7 +58,5 @@
         <remap from="/flatland_server/debug/model/stat_obj_7" to="$(arg ns)/flatland_server/debug/model/stat_obj_7"/>
         <remap from="/flatland_server/debug/model/stat_obj_8" to="$(arg ns)/flatland_server/debug/model/stat_obj_8"/>
         <remap from="/flatland_server/debug/model/stat_obj_9" to="$(arg ns)/flatland_server/debug/model/stat_obj_9"/>
-        <remap from="/tf" to="/$(arg ns)/tf"/>
-        <remap from="/clock" to="/$(arg ns)/clock"/>
       </node>
 </launch>

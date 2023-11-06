@@ -4,10 +4,7 @@
 	<arg name="map_path"/> 
 
 	<!-- Load map -->
-    <node pkg="map_server" type="map_server" name="map_server" output="screen" args="$(arg map_path)/map.yaml">
-		<!-- <remap from="/map" to="/$(arg ns)/map"/> -->
-		<remap from="/tf" to="/$(arg ns)/tf"/>
-		<remap from="/clock" to="/$(arg ns)/clock"/>
+    <node ns="$(arg ns)" pkg="map_server" type="map_server" name="map_server" output="screen" args="$(arg map_path)/map.yaml">
     </node>
 
 	<!-- Launch localization (dummy) -->

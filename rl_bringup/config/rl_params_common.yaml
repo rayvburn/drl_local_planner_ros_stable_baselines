@@ -1,0 +1,49 @@
+###################################
+# robot parameters                #
+###################################
+robot_frame: base_footprint
+
+###################################
+# planner parameters              #
+###################################
+goal_threshold: 0.6
+num_of_wps: 8
+look_ahead_distance: 1.5
+wp_reached_dist: 0.2
+
+###################################
+# RL agent parameters             #
+###################################
+update_frequency: 10
+
+# State representation - image
+# number of height cells in positive direction
+img_width_pos: 70
+# number of height cells in negative direction
+img_width_neg: 20
+# number of height cells in negative direction
+img_height: 70
+# resolution in m/cell
+resolution: 0.15
+
+# State representation - laser scan
+# this must be equal to the laser's: [(angle.max - angle.min)  / angle.increment]
+scan_size: 90
+# scan is discretized to a resolution
+resolution: 0.05
+
+###################################
+# topics                          #
+###################################
+# NOTE: if a topic does not start with the "/", it will be automatically placed within the node's namespace (unless
+# the global namespace is requested)
+state_image_generation_srv_name: image_generator/get_image
+merge_scans_srv_name: merge_scans
+
+action_topic: rl_agent/action
+done_topic: rl_agent/done
+trigger_agent_topic: trigger_agent
+wp_generator_path_srv: wp_generator/set_gobal_plan
+waypoint_topic: wp
+
+map_topic: map

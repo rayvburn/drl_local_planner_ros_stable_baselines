@@ -20,8 +20,6 @@
     <param name="default_queue_size" value="$(arg default_queue_size)" type="int"/>
     <param name="robot_mode" value="$(arg robot_mode)" type="int"/>
     <param name="enable_groups" value="$(arg enable_groups)" type="bool"/>
-    <remap from="/tf" to="/$(arg ns)/tf"/>
-		<remap from="/clock" to="/$(arg ns)/clock"/>
   </node>
 
 

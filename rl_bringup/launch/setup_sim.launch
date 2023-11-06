@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+<launch>
+    <!--
+        This is a stripped down version of the original `setup.launch`. This one includes the separated common launch
+        file and launches the simulation-specific components.
+    -->
+    <arg name="ns" default="/"/>
+    <arg name="params_file_common" default="$(find rl_bringup)/config/rl_params_common.yaml"/>
+
+    <!-- A description of the selected RL agent should be prepared as shown in the examples in rl_agent/launch/ -->
+    <!-- Specify the package containing the selected launch file -->
+    <arg name="agent_launch_pkg" default="rl_agent"/>
+    <!-- Specify the name of the launch file in the package given by agent_launch_pkg -->
+    <arg name="agent_launch_name" default="run_1_raw_cont.launch"/>
+
+    <!-- (exec|train|exec_rw) -->
+    <arg name="mode" default="exec"/>
+    <arg name="params_file_mode" default="$(find rl_bringup)/config/rl_params_$(arg mode).yaml"/>
+
+    <!-- (image|scan) -->
+    <arg name="state_representation" default="scan"/>
+
+    <!-- Simulation-specific args -->
+    <arg name="update_rate" default="10000"/>
+	<arg name="map_path" default="$(find flatland_setup)/maps/map_middle_complexity"/>
+    <arg name="robot_model_path" default="$(find flatland_setup)/robot/robot1_exec.model.yaml"/>
+    <arg name="robot_name" default="robot1"/>
+
+    <!-- Visualization -->
+    <arg name="visualize" default="True"/>
+
+    <!-- Shared parameters -->
+    <param name="use_sim_time" value="true"/>
+    <rosparam if="$(eval mode == 'exec')" ns="$(arg ns)/rl_agent/execution" file="$(arg params_file_mode)" command="load" />
+    <rosparam if="$(eval mode == 'exec_rw')" ns="$(arg ns)/rl_agent/execution" file="$(arg params_file_mode)" command="load" />
+    <rosparam if="$(eval mode == 'train')" ns="$(arg ns)/rl_agent/train" file="$(arg params_file_mode)" command="load" />
+
+    <!-- Launches RL infrastructure's components -->
+    <include file="$(find rl_bringup)/launch/setup_common.launch">
+        <arg name="ns" value="$(arg ns)" />
+        <arg name="params_file" value="$(arg params_file_common)" />
+        <arg name="agent_launch_pkg" value="$(arg agent_launch_pkg)" />
+        <arg name="agent_launch_name" value="$(arg agent_launch_name)" />
+        <arg name="state_representation" value="$(arg state_representation)"/>
+        <arg name="mode" value="$(arg mode)" />
+    </include>
+
+    <node ns="$(arg ns)" pkg="rl_agent" type="tf_python" name="tf_python_rl_agent" output="screen">
+    </node>
+
+    <!-- Start navigation stack-->
+    <include file="$(find rl_bringup)/launch/sub_launch/navigation.launch">
+        <arg name="ns" value="$(arg ns)" />
+        <arg name="map_path" value="$(arg map_path)" />
+    </include>
+
+    <!-- Start simulation -->
+    <include file="$(find rl_bringup)/launch/sub_launch/simulation.launch">
+        <arg name="ns" value="$(arg ns)" />
+        <arg name="map_path" value="$(arg map_path)" />
+        <arg name="update_rate" value="$(arg update_rate)" />
+        <arg name="robot_model_path" value="$(arg robot_model_path)" />
+        <arg name="robot_name" value="$(arg robot_name)" />
+    </include>
+
+    <!-- NOTE: `toggle_setup_init` relies on `mode` parameter (retrieves the value from param server) -->
+    <node ns="$(arg ns)" pkg="rl_bringup" type="toggle_setup_init" name="toggle_setup_init" output="screen">
+    </node>
+
+    <!-- Map visualization lauched conditionally -->
+    <group if="$(arg visualize)">
+        <include file="$(find rl_bringup)/launch/rviz.launch">
+            <arg name="ns" value="$(arg ns)" />
+        </include>
+    </group>
+
+</launch>

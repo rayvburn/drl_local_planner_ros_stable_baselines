@@ -7,6 +7,7 @@
  **/
 #include <pluginlib/class_list_macros.h>
 #include <rl_local_planner/rl_local_planner.h>
+#include <rl_local_planner/utils.h>
 
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
@@ -36,6 +37,11 @@ namespace rl_local_planner {
 		nh_.param("rl_agent/done_topic", done_topic, done_topic);
 		nh_.param("rl_agent/trigger_agent_topic", trigger_agent_topic, trigger_agent_topic);
 		nh_.param("rl_agent/wp_generator_path_srv", set_path_service_name, set_path_service_name);
+
+		action_topic = adjustTopicName(ros::this_node::getNamespace(), action_topic);
+		done_topic = adjustTopicName(ros::this_node::getNamespace(), done_topic);
+		trigger_agent_topic = adjustTopicName(ros::this_node::getNamespace(), trigger_agent_topic);
+		set_path_service_name = adjustTopicName(ros::this_node::getNamespace(), set_path_service_name);
 
 		// initializing class variables
 		if (rl_mode_ == 1)

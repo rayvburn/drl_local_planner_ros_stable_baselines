@@ -28,35 +28,33 @@ plugins:
     # optional, defaults to true, enables the advertising and publishing of noisy local frame velocity
     enable_twist_pub: true
   
+  - type: ModelTfPublisher
+    name: tf_publisher
+    publish_tf_world: false
+    # exclude: ["approx_footprint"]
+
   - type: Laser
-    name: static_laser
-    frame: static_laser_link
-    topic: static_laser
+    name: front_laser
+    frame: front_laser_link
+    topic: f_scan
     body: base_footprint
     broadcast_tf: true
     origin: [0.0, 0.0, 0.0]
     range: 10
-    # angle: {min: -3.14159265359, max: 3.14159265359, increment: 0.05235987755}
     angle: {min: -3.14159265359, max: 3.14159265359, increment: 0.06981317007}
     noise_std_dev: 0.015
     update_rate: 10
     layers: ["static"]
 
   - type: Laser
-    name: ped_laser
-    frame: ped_laser_link
-    topic: ped_laser
+    name: rear_laser
+    frame: rear_laser_link
+    topic: b_scan
     body: base_footprint
     broadcast_tf: true
     origin: [0.0, 0.0, 0.0]
     range: 10
-    # angle: {min: -3.14159265359, max: 3.14159265359, increment: 0.05235987755}
     angle: {min: -3.14159265359, max: 3.14159265359, increment: 0.06981317007}
     noise_std_dev: 0.015
     update_rate: 10
-    layers: ["ped"]
-
-  - type: ModelTfPublisher
-    name: tf_publisher
-    publish_tf_world: false
-    # exclude: ["approx_footprint"]
+    layers: ["static"]

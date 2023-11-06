@@ -53,6 +53,7 @@ project(rl_agent)
 
   add_executable(laser_scan_merger
     src/laser_scan_merger.cpp
+    src/utils.cpp
   )
 
   add_dependencies(laser_scan_merger
@@ -66,6 +67,7 @@ project(rl_agent)
 
   add_executable(tf_python
     src/tf_python.cpp
+    src/utils.cpp
   )
 
   add_dependencies(tf_python

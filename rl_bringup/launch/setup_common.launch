@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<launch>
+    <!--
+        This is a stripped down version of the original `setup.launch`. This one launches only the components that are
+        shared between the simulated setup and the real-world one
+    -->
+    <arg name="ns" default="/"/>
+    <arg name="params_file" default="$(find rl_bringup)/config/rl_params_common.yaml"/>
+
+    <!-- Specify the package containing the selected launch file -->
+    <arg name="agent_launch_pkg" default="rl_agent"/>
+    <!-- Specify the name of the launch file in the package given by agent_launch_pkg -->
+    <arg name="agent_launch_name" default="run_1_raw_cont.launch"/>
+
+    <!-- Possible values and their enum correspondences are listed below -->
+    <arg name="state_representation" default="scan"/>
+    <!-- NOTE: code documentation gives conflicting explanations (state_collector vs rl_params_img/scan.yaml) -->
+    <arg name="state_enum" if="$(eval state_representation == 'image')" value="0"/>
+    <arg name="state_enum" if="$(eval state_representation == 'scan')" value="1"/>
+
+    <!-- Possible values and their enum correspondences are listed below -->
+    <arg name="mode" default="exec"/>
+    <arg name="mode_enum" if="$(eval mode == 'exec')" value="0"/>
+    <arg name="mode_enum" if="$(eval mode == 'train')" value="1"/>
+    <arg name="mode_enum" if="$(eval mode == 'exec_rw')" value="2"/>
+
+    <!-- Set parameters shared among the launched nodes -->
+    <param name="$(arg ns)/rl_agent/state_mode" value="$(arg state_enum)"/>
+    <param name="$(arg ns)/rl_agent/train_mode" value="$(arg mode_enum)"/>
+    <rosparam ns="$(arg ns)/rl_agent" file="$(arg params_file)" command="load" />
+
+    <!-- RL infrastructure-->
+    <!-- nodes will be launched within the specified namespace -->
+    <node ns="$(arg ns)" pkg="rl_agent" type="laser_scan_merger" name="laser_scan_merger_rl_agent" output="screen">
+    </node>
+
+    <node ns="$(arg ns)" pkg="rl_local_planner" type="image_generator" name="image_generator_rl_agent" output="screen">
+    </node>
+
+    <node ns="$(arg ns)" pkg="rl_local_planner" type="wp_generator" name="wp_generator_rl_agent" output="screen">
+    </node>
+
+    <!-- NOTE
+        Updating the PYTHONPATH here conflicts with the environment configuration that is set up by the
+        ppo_launcher below (different Python versions)
+    -->
+    <!-- It launches a specific PPO agent after activating the virtualenv of the package -->
+    <!-- It is crucial to pass all the remaps (of the given launch file) within the quotes -->
+    <node pkg="rl_bringup" type="run_ppo_agent.sh" name="ppo_launcher" output="screen" required="true"
+        args="$(arg agent_launch_pkg) $(arg agent_launch_name) &quot;mode:=$(arg mode) ns:=$(arg ns)&quot;"
+    />
+</launch>

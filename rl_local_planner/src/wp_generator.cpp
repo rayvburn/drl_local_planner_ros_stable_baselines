@@ -6,7 +6,7 @@
  * @date 		2019/04/05
  **/
 #include <rl_local_planner/wp_generator.h>
-
+#include <rl_local_planner/utils.h>
 
 namespace rl_local_planner {
 
@@ -22,13 +22,20 @@ namespace rl_local_planner {
 		// Services
 		std::string global_plan_service_name = ros::this_node::getName() + "/set_gobal_plan";
 		nh_.param("rl_agent/wp_generator_path_srv", global_plan_service_name, global_plan_service_name);
+		global_plan_service_name = rl_local_planner::adjustTopicName(
+			ros::this_node::getNamespace(),
+			global_plan_service_name
+		);
 		set_path_service = nh_.advertiseService(global_plan_service_name, &WpGenerator::path_callback_, this);
 
 		//Publisher
 		std::string wp_topic = "wp";
 		std::string wp_reached_topic = "wp_reached";
 		nh_.param("rl_agent/waypoint_topic", wp_topic, wp_topic);
-		nh_.param("rl_agent/waypoint_reached_topic", wp_reached_topic, wp_reached_topic);
+		nh_.param("rl_agent/train/waypoint_reached_topic", wp_reached_topic, wp_reached_topic);
+		wp_topic = rl_local_planner::adjustTopicName(ros::this_node::getNamespace(), wp_topic);
+		wp_reached_topic = rl_local_planner::adjustTopicName(ros::this_node::getNamespace(), wp_reached_topic);
+
 		wp_pub_ = nh_.advertise<rl_msgs::Waypoint>(wp_topic, 1, true);
 		wp_reached_pub_ = nh_.advertise<rl_msgs::Waypoint>(wp_reached_topic, 1, true);
 	}
@@ -162,8 +169,9 @@ int main(int argc, char** argv){
   ros::init(argc, argv, "wp_generator");
   ros::NodeHandle node;
   int rl_mode;
-  std::string train_mode_topic = ros::this_node::getNamespace() + "/rl_agent/train_mode";
-  node.param(train_mode_topic, rl_mode, 1);
+  std::string train_mode_param = ros::this_node::getNamespace() + "/rl_agent/train_mode";
+  train_mode_param = rl_local_planner::adjustTopicName(ros::this_node::getNamespace(), train_mode_param);
+  node.param(train_mode_param, rl_mode, 1);
   rl_local_planner::WpGenerator wg(node);
 	ros::WallRate r(100);
 	while (ros::ok()) {

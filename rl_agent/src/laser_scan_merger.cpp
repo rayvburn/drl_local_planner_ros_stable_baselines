@@ -6,12 +6,14 @@
  * @comment 	Code snippets are taken from: https://github.com/iralabdisco/ira_laser_tools
  **/
 #include <rl_agent/laser_scan_merger.h>
+#include <rl_agent/utils.h>
 
 namespace rl_agent {
 
 	LaserScanMerger::LaserScanMerger(const ros::NodeHandle& node_handle): nh_(node_handle){
 		std::string merge_service_name_ = "merge_scans";
 		nh_.param("rl_agent/merge_scans_srv_name", merge_service_name_, merge_service_name_);
+		merge_service_name_ = rl_agent::adjustTopicName(ros::this_node::getNamespace(), merge_service_name_);
         merge_service_ = nh_.advertiseService(merge_service_name_, &LaserScanMerger::merge_scan_callback, this);
 
         nh_.getParam("rl_agent/robot_frame", robot_frame_);

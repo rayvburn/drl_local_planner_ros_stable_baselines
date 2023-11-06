@@ -21,7 +21,13 @@
 
   <!-- ******************* launch flatland server ****************** -->
   <env name="GMON_OUT_PREFIX" value="flatland_server" />
-  <node name="flatland_server" pkg="flatland_server" type="flatland_server" output="screen">  
+  <arg name="remap_prefix" value="" if="$(eval ns == '' or ns == '/')" />
+  <arg name="remap_prefix" value="/$(arg ns)" unless="$(eval ns == '' or ns == '/')" />
+  <!--
+    Launching the node within the $(arg ns) namespace, when it is different than "/" (global namespace)
+    breaks, e.g., publishing of the TF or odometry messages
+  -->
+  <node name="flatland_server" pkg="flatland_server" type="flatland_server" output="screen">
     <param name="world_path" value="$(arg world_path)" />
     <param name="update_rate" value="$(arg update_rate)" />
     <param name="step_size" value="$(arg step_size)" />
@@ -30,19 +36,37 @@
     <param name="initial_pose_x" value="$(arg initial_pose_x)" />
     <param name="initial_pose_y" value="$(arg initial_pose_y)" />
     <param name="initial_pose_a" value="$(arg initial_pose_a)" />
-    <remap from="/tf" to="/$(arg ns)/tf"/>
-    <remap from="/clock" to="/$(arg ns)/clock"/>
+    <!-- rename services -->
+    <remap from="/delete_model" to="$(arg remap_prefix)/delete_model" />
+    <remap from="/delete_models" to="$(arg remap_prefix)/delete_models" />
+    <remap from="/move_model" to="$(arg remap_prefix)/move_model" />
+    <remap from="/pause" to="$(arg remap_prefix)/pause" />
+    <remap from="/respawn_models" to="$(arg remap_prefix)/respawn_models" />
+    <remap from="/resume" to="$(arg remap_prefix)/resume" />
+    <remap from="/is_in_step" to="$(arg remap_prefix)/is_in_step" />
+    <remap from="/step" to="$(arg remap_prefix)/step" />
+    <remap from="/spawn_model" to="$(arg remap_prefix)/spawn_model" />
+    <remap from="/spawn_models" to="$(arg remap_prefix)/spawn_models" />
+    <remap from="/toggle_pause" to="$(arg remap_prefix)/toggle_pause" />
+    <!-- rename DiffDrive plugin topics -->
+    <remap from="/odom" to="$(arg remap_prefix)/odom" />
+    <remap from="/twist" to="$(arg remap_prefix)/twist" />
+    <remap from="/cmd_vel" to="$(arg remap_prefix)/cmd_vel" />
+    <!-- rename published sensor topics -->
+    <remap from="/static_laser" to="$(arg remap_prefix)/static_laser" />
+    <remap from="/ped_laser" to="$(arg remap_prefix)/ped_laser" />
+    <remap from="/f_scan" to="$(arg remap_prefix)/f_scan" />
+    <remap from="/b_scan" to="$(arg remap_prefix)/b_scan" />
   </node>
 
   <!--  ***************** Spawn Robot Model *****************  -->
+  <!-- Setting the `ns` below to $(arg ns) breaks something (?) -->
   <node name="spawn_robot" pkg="rosservice" type="rosservice"
-    args="call --wait spawn_model &quot;{
+    args="call --wait $(arg remap_prefix)/spawn_model &quot;{
       yaml_path: '$(arg robot_model_path)',
       name: '$(arg robot_name)',
       ns: '',
       pose: {x: $(arg initial_pose_x), y: $(arg initial_pose_y), theta: $(arg initial_pose_a)}}&quot;"
     >
-    <remap from="/tf" to="/$(arg ns)/tf"/>
-    <remap from="/clock" to="/$(arg ns)/clock"/>
   </node>
 </launch>

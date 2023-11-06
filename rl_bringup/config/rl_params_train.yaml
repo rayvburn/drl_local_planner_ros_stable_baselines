@@ -1,0 +1,28 @@
+# Loaded i.a. by the StateCollector class
+laserscan_static_obstacles_topic: static_laser
+laserscan_pedestrians_topic: ped_laser
+
+# Defined by `twist_pub` in DiffDrive plugin of the flatland
+twist_topic: twist
+
+waypoint_reached_topic: wp_reached
+goal_topic: move_base_simple/goal
+transformed_goal_topic: rl_agent/robot_to_goal
+
+nav_goal_status_topic: move_base/status
+
+# changing the path planner requires adjusting the name embedded into the topic
+global_path_topic: move_base/NavfnROS/plan
+# default AMCL topic
+initial_pose_topic: initialpose
+
+new_task_started_topic: rl_agent/new_task_started
+
+# to send stop commands to a DiffDrive controller in simulation
+cmd_vel_topic: cmd_vel
+
+# Enum:
+#  0: Pedestrians don't avoid robot
+# 10: Pedestrians always avoid robot
+# 11: Pedestrians avoid robot if it stands still and after reaction t
+ped_type: 11

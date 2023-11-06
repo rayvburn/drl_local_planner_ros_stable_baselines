@@ -18,6 +18,7 @@ from rl_msgs.srv import StateImageGenerationSrv
 from geometry_msgs.msg import TwistStamped, PoseStamped, Pose
 from std_srvs.srv import SetBool
 from rl_msgs.srv import MergeScans
+from rl_agent.common_utils import adjust_topic_name
 import time
 
 class StateCollector():
@@ -48,13 +49,22 @@ class StateCollector():
 
         # prepare list of topics to subscribe (default values taken from the original implementation)
         waypoint_topic = rospy.get_param("%s/rl_agent/waypoint_topic" % (self.__ns), "%s/wp" % (self.__ns))
-        waypoint_reached_topic = rospy.get_param("%s/rl_agent/waypoint_reached_topic" % (self.__ns), "%s/wp_reached" % (self.__ns))
+        waypoint_reached_topic = rospy.get_param("%s/rl_agent/train/waypoint_reached_topic" % (self.__ns), "%s/wp_reached" % (self.__ns))
         scan_static_obs_topic = rospy.get_param("%s/rl_agent/train/laserscan_static_obstacles_topic" % (self.__ns), "%s/static_laser" % (self.__ns))
         scan_pedestrians_topic = rospy.get_param("%s/rl_agent/train/laserscan_pedestrians_topic" % (self.__ns), "%s/ped_laser" % (self.__ns))
         twist_topic = rospy.get_param("%s/rl_agent/train/twist_topic" % (self.__ns), "%s/twist" % (self.__ns))
-        robot_to_goal_topic = rospy.get_param("%s/rl_agent/transformed_goal_topic" % (self.__ns), "%s/rl_agent/robot_to_goal" % (self.__ns))
+        robot_to_goal_topic = rospy.get_param("%s/rl_agent/train/transformed_goal_topic" % (self.__ns), "%s/rl_agent/robot_to_goal" % (self.__ns))
         scan_rear_topic = rospy.get_param("%s/rl_agent/execution/scan_rear_topic" % (self.__ns), "%s/b_scan" % (self.__ns))
         scan_front_topic = rospy.get_param("%s/rl_agent/execution/scan_front_topic" % (self.__ns), "%s/f_scan" % (self.__ns))
+
+        waypoint_topic = adjust_topic_name(self.__ns, waypoint_topic)
+        waypoint_reached_topic = adjust_topic_name(self.__ns, waypoint_reached_topic)
+        scan_static_obs_topic = adjust_topic_name(self.__ns, scan_static_obs_topic)
+        scan_pedestrians_topic = adjust_topic_name(self.__ns, scan_pedestrians_topic)
+        twist_topic = adjust_topic_name(self.__ns, twist_topic)
+        robot_to_goal_topic = adjust_topic_name(self.__ns, robot_to_goal_topic)
+        scan_rear_topic = adjust_topic_name(self.__ns, scan_rear_topic)
+        scan_front_topic = adjust_topic_name(self.__ns, scan_front_topic)
 
         # Subscriber
         self.wp_sub_ = rospy.Subscriber(waypoint_topic, Waypoint, self.__wp_callback, queue_size=1)
@@ -81,6 +91,9 @@ class StateCollector():
         # Service
         image_srv_name = rospy.get_param("%s/rl_agent/state_image_generation_srv_name" % (self.__ns), '%s/image_generator/get_image' % (self.__ns))
         merge_scans_srv_name = rospy.get_param("%s/rl_agent/merge_scans_srv_name" % (self.__ns), '%s/merge_scans' % (self.__ns))
+
+        image_srv_name = adjust_topic_name(self.__ns, image_srv_name)
+        merge_scans_srv_name = adjust_topic_name(self.__ns, merge_scans_srv_name)
 
         self.__img_srv = rospy.ServiceProxy(image_srv_name, StateImageGenerationSrv)
         self.__merge_scans = rospy.ServiceProxy(merge_scans_srv_name, MergeScans)

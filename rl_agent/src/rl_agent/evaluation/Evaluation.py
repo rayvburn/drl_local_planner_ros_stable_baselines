@@ -22,6 +22,7 @@ from flatland_msgs.msg import DebugTopicList
 from rosgraph_msgs.msg import Clock
 from pedsim_msgs.msg import AgentStates
 from visualization_msgs.msg import MarkerArray, Marker
+from rl_agent.common_utils import adjust_topic_name
 
 class Evaluation():
     '''
@@ -41,22 +42,34 @@ class Evaluation():
         self.__flatland_topics = []                                     # list of flatland topics
         self.__timestep = 0                                             # actual timestemp of training
         self.__NS = ns
-        self.MODE = rospy.get_param("%s/rl_agent/train_mode", 1)
         self.__clock = Clock().clock
+        # TODO: parameterize robot radius
         self.__task_generator = TaskGenerator(self.__NS, self.__state_collector, 0.46)
         self.__recent_agent_states = []
 
+        # Read params
+        self.MODE = rospy.get_param("%s/rl_agent/train_mode"%self.__NS, 1)
+        global_path_topic = rospy.get_param("%s/rl_agent/train/global_path_topic"%self.__NS, "%s/move_base/NavfnROS/plan"%self.__NS)
+        done_topic = rospy.get_param("%s/rl_agent/done_topic"%self.__NS, "%s/rl_agent/done"%self.__NS)
+        new_task_started_topic = rospy.get_param("%s/rl_agent/train/new_task_started_topic"%self.__NS, "%s/rl_agent/new_task_started"%self.__NS)
+        action_topic = rospy.get_param("%s/rl_agent/action_topic"%self.__NS, "%s/rl_agent/action"%self.__NS)
+
+        global_path_topic = adjust_topic_name(global_path_topic)
+        done_topic = adjust_topic_name(done_topic)
+        new_task_started_topic = adjust_topic_name(new_task_started_topic)
+        action_topic = adjust_topic_name(action_topic)
+
         # Subscriber for getting data
-        #self.__odom_sub = rospy.Subscriber("%s/odom"%self.__NS, Odometry, self.__odom_callback, queue_size=1)
-        self.__global_plan_sub = rospy.Subscriber("%s/move_base/NavfnROS/plan"%self.__NS, Path, self.__path_callback, queue_size=1)
-        # self.__path_sub = rospy.Subscriber("%s/move_base/GlobalPlanner/plan" % self.__NS, Path, self.__path_callback,  queue_size=1)
-        self.__done_sub = rospy.Subscriber("%s/rl_agent/done"%self.__NS, Bool, self.__done_callback, queue_size=1)
-        self.__new_task_sub = rospy.Subscriber('%s/rl_agent/new_task_started'%self.__NS, Bool, self.__new_task_callback, queue_size=1)
+        self.__global_plan_sub = rospy.Subscriber(global_path_topic, Path, self.__path_callback, queue_size=1)
+        self.__done_sub = rospy.Subscriber(done_topic, Bool, self.__done_callback, queue_size=1)
+        self.__new_task_sub = rospy.Subscriber(new_task_started_topic, Bool, self.__new_task_callback, queue_size=1)
+        self.__agent_action_sub = rospy.Subscriber(action_topic, Twist, self.__trigger_callback)
+
+        self.clock_sub = rospy.Subscriber('/clock', Clock, self.__clock_callback)
+
+        # simulator-specific subscriptions
         self.__flatland_topics_sub = rospy.Subscriber("%s/flatland_server/debug/topics"%self.__NS, DebugTopicList, self.__flatland_topic_callback, queue_size=1)
-        self.__agent_action_sub = rospy.Subscriber('%s/rl_agent/action'%self.__NS, Twist, self.__trigger_callback)
         self.__ped_sub = rospy.Subscriber('%s/pedsim_simulator/simulated_agents' % self.__NS, AgentStates, self.__ped_callback)
-        if self.MODE == 1 or self.MODE == 0:
-            self.clock_sub = rospy.Subscriber('%s/clock' % self.__NS, Clock, self.__clock_callback)
 
         # Publisher for generating qualitative image
         self.__driven_path_pub = rospy.Publisher('%s/rl_eval/driven_path'%self.__NS, Path, queue_size=1)

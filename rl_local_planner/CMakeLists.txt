@@ -77,6 +77,7 @@ add_definitions(${EIGEN3_DEFINITIONS})
 
 add_library(rlLocalPlanner 	
   src/rl_local_planner.cpp
+  src/utils.cpp
 )
 
 add_dependencies(rlLocalPlanner
@@ -91,6 +92,7 @@ target_link_libraries(rlLocalPlanner
 
 add_executable(wp_generator
   src/wp_generator.cpp
+  src/utils.cpp
 )
 
 add_dependencies(wp_generator
@@ -104,6 +106,7 @@ target_link_libraries(wp_generator
 
 add_executable(image_generator
   src/image_generator.cpp
+  src/utils.cpp
 )
 
 add_dependencies(image_generator

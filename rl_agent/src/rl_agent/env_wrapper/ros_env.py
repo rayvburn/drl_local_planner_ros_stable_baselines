@@ -30,6 +30,8 @@ from nav_msgs.msg import OccupancyGrid
 from rl_agent.env_utils.debug_ros_env import DebugRosEnv
 from rl_agent.env_utils.reward_container import RewardContainer
 from rl_agent.env_utils.task_generator import TaskGenerator
+from rl_agent.common_utils import adjust_topic_name
+
 class RosEnvAbs(gym.Env):
     '''
     This (abstract) class is a simulation environment wrapper.
@@ -90,12 +92,15 @@ class RosEnvAbs(gym.Env):
                 self.__reward_cont = RewardContainer(self.NS, robot_radius, goal_radius, self.action_space.high[0])
             self.__task_generator = TaskGenerator(self.NS, self.__state_collector, self.ROBOT_RADIUS)
 
-        # Subscriber
         trigger_agent_topic = rospy.get_param("%s/rl_agent/trigger_agent_topic" % (self.NS), "%s/trigger_agent" % (self.NS))
+        action_topic = rospy.get_param("%s/rl_agent/action_topic" % (self.NS), "%s/rl_agent/action" % (self.NS))
+        trigger_agent_topic = adjust_topic_name(self.NS, trigger_agent_topic)
+        action_topic = adjust_topic_name(self.NS, action_topic)
+
+        # Subscriber
         self.__trigger_sub = rospy.Subscriber(trigger_agent_topic, Bool, self.__trigger_callback)
 
         # Publisher
-        action_topic = rospy.get_param("%s/rl_agent/action_topic" % (self.NS), "%s/rl_agent/action" % (self.NS))
         self.__agent_action_pub = rospy.Publisher(action_topic, Twist, queue_size=1)
 
         # Sleeping so that py-Publisher has time to setup!
