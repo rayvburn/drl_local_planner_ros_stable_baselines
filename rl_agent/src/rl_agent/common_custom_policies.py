@@ -10,8 +10,7 @@ from stable_baselines.common.policies import *
 import stable_baselines.common.policies as common
 import rospy
 import numpy as np
-
-NS="sim1"
+from rl_agent.common_utils import find_ros_param
 
 def ortho_init(scale=1.0):
     """
@@ -122,9 +121,33 @@ class CNN1DPolicy_multi_input(common.FeedForwardPolicy):
     """
     def __init__(self, *args, **kwargs):
         try:
-            kwargs["laser_scan_len"] = rospy.get_param("%s/rl_agent/scan_size"%NS, 90)
+            print("Looking for a laser scan parameters for 'CNN1DPolicy_multi_input' policy")
+            param_path = find_ros_param("rl_agent/scan_size")
+            # rospy.logerr etc does not work from here
+            if param_path == None:
+                print(
+                    "\033[91m"
+                    + "Could not find a parameter matching the 'rl_agent/scan_size' pattern. "
+                    + "Running with the default laser scan length (90)"
+                    + "\033[0m"
+                )
+                kwargs["laser_scan_len"] = 90
+            else:
+                kwargs["laser_scan_len"] = rospy.get_param(param_path)
+                print(
+                    "Found a parameter matching the 'rl_agent/scan_size' pattern at '"
+                    + str(param_path) +
+                    "' with a value of "
+                    + str(kwargs["laser_scan_len"])
+                )
         except ConnectionRefusedError:
             kwargs["laser_scan_len"] = 90
+            print(
+                "\033[91m"
+                + "Encountered exception looking for a parameter matching the 'rl_agent/scan_size' pattern. "
+                + "Running with the default laser scan length (90)"
+                + "\033[0m"
+            )
         super(CNN1DPolicy_multi_input, self).__init__(*args, **kwargs, cnn_extractor=laser_cnn_multi_input, feature_extraction="cnn")
 
 
