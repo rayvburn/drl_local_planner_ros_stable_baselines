@@ -7,7 +7,6 @@ set(PACKAGE_DEPS
   std_msgs
   nav_msgs
   tf
-  flatland_msgs
 )
 
 find_package(catkin REQUIRED COMPONENTS ${PACKAGE_DEPS})
@@ -24,15 +23,3 @@ catkin_package(
 install(DIRECTORY config/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/config/
 )
-
-###########
-## Build ##
-###########
-
-include_directories(${catkin_INCLUDE_DIRS})
-link_directories(${catkin_LIBRARY_DIRS})
-
-set(TOGGLE_SETUP_INIT toggle_setup_init)
-add_executable(${TOGGLE_SETUP_INIT} src/toggle_setup_init.cpp)
-add_dependencies(${TOGGLE_SETUP_INIT} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(${TOGGLE_SETUP_INIT} ${catkin_LIBRARIES})

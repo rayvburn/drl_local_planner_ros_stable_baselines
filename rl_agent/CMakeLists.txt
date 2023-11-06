@@ -82,6 +82,7 @@ project(rl_agent)
   catkin_install_python(PROGRAMS
     scripts/train_scripts/train_ppo.py
     scripts/run_scripts/run_ppo.py
+    scripts/toggle_setup_init.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
   
   install(DIRECTORY launch/

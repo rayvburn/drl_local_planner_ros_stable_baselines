@@ -71,7 +71,7 @@
     </include>
 
     <!-- NOTE: `toggle_setup_init` relies on `mode` parameter (retrieves the value from param server) -->
-    <node ns="$(arg ns)" pkg="rl_bringup" type="toggle_setup_init" name="toggle_setup_init" output="screen">
+    <node ns="$(arg ns)" pkg="rl_agent" type="toggle_setup_init.py" name="toggle_setup_init" output="screen">
     </node>
 
     <!-- Map visualization lauched conditionally -->
