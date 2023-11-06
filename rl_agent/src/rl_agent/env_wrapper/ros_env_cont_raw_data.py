@@ -20,10 +20,11 @@ from rl_agent.env_wrapper.ros_env_raw_data import RosEnvRaw
 # messages
 from geometry_msgs.msg import Twist
 
+from rl_agent.common_utils import get_ros_param_goal_tolerance
 
 # Parameters
-GOAL_RADIUS = 0.4
-WAYPOINT_RADIUS = 0.2
+GOAL_RADIUS_DEFAULT = 0.4
+WAYPOINT_RADIUS_DEFAULT = 0.2
 
 class RosEnvContRaw(RosEnvRaw):
     '''
@@ -36,8 +37,8 @@ class RosEnvContRaw(RosEnvRaw):
         state_size = (1, state_size_t, 1)
         observation_space = spaces.Box(low=0, high=6, shape=state_size, dtype=np.float)
         action_space = spaces.Box(low=np.array([0.0, -0.5]), high=np.array([0.5, 0.5]), dtype=np.float)
-
-        super(RosEnvContRaw, self).__init__(ns, state_collector, execution_mode, task_mode, state_size, observation_space, stack_offset, [], action_space, debug, GOAL_RADIUS, WAYPOINT_RADIUS, robot_radius, reward_fnc)
+        goal_radius = get_ros_param_goal_tolerance(GOAL_RADIUS_DEFAULT)
+        super(RosEnvContRaw, self).__init__(ns, state_collector, execution_mode, task_mode, state_size, observation_space, stack_offset, [], action_space, debug, goal_radius, WAYPOINT_RADIUS_DEFAULT, robot_radius, reward_fnc)
 
     def get_cmd_vel_(self, action):
         vel_msg = Twist()

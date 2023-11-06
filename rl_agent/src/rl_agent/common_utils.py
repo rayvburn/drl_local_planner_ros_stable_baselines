@@ -19,3 +19,49 @@ def adjust_topic_name(node_namespace, topic_name):
     topic_name_mod = "/" + node_namespace + "/" + topic_name
     # Remove (possible) extra consecutive "/" characters
     return '/' + '/'.join(filter(None, topic_name_mod.split('/')))
+
+def get_ros_param_pattern(pattern, default):
+    param_key = find_ros_param(pattern)
+    if param_key == None:
+        return default
+    return rospy.get_param(param_key, default)
+
+def get_ros_param_patterns(param_keys, default, selfunc="max"):
+    param_values = []
+    for key in param_keys:
+        # skip None
+        if not key:
+            continue
+        param_values.append(rospy.get_param(key, default))
+    if selfunc == "max":
+        param_value = max(param_values)
+    else:
+        param_value = min(param_values)
+    # possibly None
+    if not param_value:
+        return default
+    # valid value
+    return param_value
+
+def get_ros_param_max_vel_translational(default):
+    param_keys = [
+        find_ros_param("max_vel_x"),
+        find_ros_param("max_vel_trans"),
+        find_ros_param("max_vel_lin"),
+        find_ros_param("max_linear_vel")
+    ]
+    return get_ros_param_patterns(param_keys, default)
+
+def get_ros_param_max_vel_rotational(default):
+    param_keys = [
+        find_ros_param("max_vel_theta"),
+        find_ros_param("max_rotation_vel"),
+        find_ros_param("max_vel_th")
+    ]
+    return get_ros_param_patterns(param_keys, default)
+
+def get_ros_param_goal_tolerance(default):
+    param_keys = [
+        find_ros_param("xy_goal_tolerance")
+    ]
+    return get_ros_param_patterns(param_keys, default)
