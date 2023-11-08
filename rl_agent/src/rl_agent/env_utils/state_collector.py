@@ -129,6 +129,9 @@ class StateCollector():
             # print("__remove_nans_from_scan: %f" % (time.time() - start))
 
             # start = time.time()
+
+            # FIXME: there is an assumption that both scans are from the same source, i.e., there must be no positional
+            # offset between the front and rear laser
             merged_scan = LaserScan()
             merged_scan.header.frame_id = self.__robot_base_frame
             merged_scan.header.stamp = static_scan_msg.header.stamp
