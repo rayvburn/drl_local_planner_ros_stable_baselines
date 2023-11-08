@@ -27,7 +27,7 @@ if __name__ == '__main__':
   if rl_mode == 2:
     keep_clock_running = True
 
-  n_sec = 60.0
+  n_sec = 10.0
   step_sim_srv_name = rospy.get_namespace() + "/step"
   step_sim_srv_name = adjust_topic_name(rospy.get_namespace(), step_sim_srv_name)
   step_simulation_ = rospy.ServiceProxy(step_sim_srv_name, Step)
@@ -47,6 +47,12 @@ if __name__ == '__main__':
       try:
         if not step_simulation_.call(msg):
           rospy.logerr("Failed to call step_simulation_ service from the `toggle_setup_init` node")
-        rate.sleep()
+
+        # rate.sleep()
+        # There are some strange issues with rate.sleep(); when the service is called properly (returns true),
+        # but the execution of the iteration consists only of the service call, the sleep blocks forever.
+        # On the other hand, when there is some rospy.loginfo before the rate.sleep(), all works properly.
+        # The call below acts as a workaround for the call above.
+        time.sleep(0.03)
       except rospy.ROSInterruptException:
         print("Interrupt exception occurred in `toggle_setup_init.py` node")
