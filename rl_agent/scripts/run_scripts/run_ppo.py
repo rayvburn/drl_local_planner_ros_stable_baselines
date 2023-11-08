@@ -24,7 +24,7 @@ from rl_agent.env_wrapper.ros_env_cont_img_vel import RosEnvContImgVel
 from rl_agent.env_wrapper.ros_env_disc_img_vel import RosEnvDiscImgVel
 from rl_agent.env_wrapper.ros_env_disc_img import RosEnvDiscImg
 from rl_agent.env_utils.state_collector import StateCollector
-
+from rl_agent.common_utils import get_ros_param_footprint_circumradius
 
 from stable_baselines.common.vec_env import DummyVecEnv, VecNormalize, VecFrameStack
 from stable_baselines.ppo2.ppo2 import PPO2
@@ -88,9 +88,13 @@ def run_ppo(config, state_collector, agent_name ="ppo_99_8507750", policy ="CnnP
     print("Number of stacks: %d, stack offset: %d" % ( model.observation_space.shape[2], stack_offset))
     print("\n")
 
+    # load robot radius from ROS parameters
+    robot_radius = get_ros_param_footprint_circumradius(0.46)
+    # load rew_fnc parameter from param server
+    rew_fnc = rospy.get_param("%s/rl_agent/rew_fnc" % ns, 19)
 
     #Loading environment
-    env = load_train_env(ns, state_collector, 0.46, 19, num_stacks, stack_offset, debug, task_mode, mode, policy, disc_action_space, normalize)
+    env = load_train_env(ns, state_collector, robot_radius, rew_fnc, num_stacks, stack_offset, debug, task_mode, mode, policy, disc_action_space, normalize)
 
     # Resetting environment
     if mode == "train" or mode == "eval":

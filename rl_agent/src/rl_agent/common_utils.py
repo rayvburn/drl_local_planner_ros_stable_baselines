@@ -42,3 +42,10 @@ def get_ros_param_patterns(param_keys, default, selfunc="max"):
         return default
     # valid value
     return param_value
+
+def get_ros_param_footprint_circumradius(default):
+    param_keys = [
+        find_ros_param("robot_radius"), # costmap_2d's param for circular robots
+        find_ros_param("robot_circumradius")
+    ]
+    return get_ros_param_patterns(param_keys, default)

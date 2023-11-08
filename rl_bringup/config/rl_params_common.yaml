@@ -19,6 +19,9 @@ wp_reached_dist: 0.2
 ###################################
 update_frequency: 10
 
+# the value used during training, corresponds to `rew_fnc` in the `entrypoint_ppo2.sh`
+rew_fnc: 19
+
 # State representation - image
 # number of height cells in positive direction
 img_width_pos: 70
