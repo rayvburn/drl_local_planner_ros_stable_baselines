@@ -1,7 +1,0 @@
-rl_agent:
-  state_mode: 1 # 0: image, 1: laserscan
-  
-  # scan is discretized to a resolution
-  scan_resolution: 0.05
-  # this must be equal to the laser's: [(angle.max - angle.min)  / angle.increment]
-  scan_size: 90 
