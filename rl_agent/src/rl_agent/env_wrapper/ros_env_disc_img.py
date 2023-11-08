@@ -21,9 +21,6 @@ from rl_agent.env_wrapper.ros_env_img import RosEnvImg
 # messages
 from geometry_msgs.msg import Twist
 
-from rl_agent.common_utils import get_ros_param_goal_tolerance
-from rl_agent.common_utils import get_ros_param_max_vel_translational, get_ros_param_max_vel_rotational
-
 # Parameters
 ACTION_SIZE = 6
 GOAL_RADIUS_DEFAULT = 0.4
@@ -43,8 +40,8 @@ class RosEnvDiscImg(RosEnvImg):
         observation_space = spaces.Box(low=0, high=100, shape=state_size, dtype=np.float)
 
         self.action = np.array([0.0, 0.0])
-        self.v_max_ = get_ros_param_max_vel_translational(0.8)
-        self.w_max_ = get_ros_param_max_vel_rotational(1.2)
+        self.v_max_ = rospy.get_param("%s/rl_agent/max_vel_x" % ns, 0.8)
+        self.w_max_ = rospy.get_param("%s/rl_agent/max_vel_th" % ns, 1.2)
         self.__possible_actions = {
             0: [0.0, -self.w_max_],
             1: [self.v_max_, 0.0],
@@ -55,7 +52,7 @@ class RosEnvDiscImg(RosEnvImg):
         }
         action_size = len(self.__possible_actions)
         action_space = spaces.Discrete(action_size)
-        goal_radius = get_ros_param_goal_tolerance(GOAL_RADIUS_DEFAULT)
+        goal_radius = rospy.get_param("%s/rl_agent/xy_goal_tolerance" % ns, GOAL_RADIUS_DEFAULT)
         super(RosEnvDiscImg, self).__init__(ns, state_collector, execution_mode, task_mode, state_size,
                                             observation_space, stack_offset, action_size, action_space, debug, goal_radius,
                                             WAYPOINT_RADIUS_DEFAULT, robot_radius, reward_fnc)

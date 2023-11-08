@@ -2,6 +2,9 @@
 # robot parameters                #
 ###################################
 robot_frame: base_footprint
+max_vel_x: 0.8
+max_vel_th: 1.2
+xy_goal_tolerance: 0.4
 
 ###################################
 # planner parameters              #

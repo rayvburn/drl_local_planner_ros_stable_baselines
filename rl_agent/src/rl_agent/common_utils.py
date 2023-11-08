@@ -42,26 +42,3 @@ def get_ros_param_patterns(param_keys, default, selfunc="max"):
         return default
     # valid value
     return param_value
-
-def get_ros_param_max_vel_translational(default):
-    param_keys = [
-        find_ros_param("max_vel_x"),
-        find_ros_param("max_vel_trans"),
-        find_ros_param("max_vel_lin"),
-        find_ros_param("max_linear_vel")
-    ]
-    return get_ros_param_patterns(param_keys, default)
-
-def get_ros_param_max_vel_rotational(default):
-    param_keys = [
-        find_ros_param("max_vel_theta"),
-        find_ros_param("max_rotation_vel"),
-        find_ros_param("max_vel_th")
-    ]
-    return get_ros_param_patterns(param_keys, default)
-
-def get_ros_param_goal_tolerance(default):
-    param_keys = [
-        find_ros_param("xy_goal_tolerance")
-    ]
-    return get_ros_param_patterns(param_keys, default)

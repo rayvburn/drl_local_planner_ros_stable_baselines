@@ -21,8 +21,6 @@ from rl_agent.env_wrapper.ros_env_img import RosEnvImg
 # Messages
 from geometry_msgs.msg import Twist
 
-from rl_agent.common_utils import get_ros_param_goal_tolerance
-
 # Parameters
 GOAL_RADIUS_DEFAULT = 0.4
 WAYPOINT_RADIUS_DEFAULT = 0.2
@@ -42,7 +40,7 @@ class RosEnvContImg(RosEnvImg):
         action_space = spaces.Box(low=np.array([0.0, -1.2]), high=np.array([0.8, 1.2]), dtype=np.float)
         # action_space = spaces.Box(low=np.array([0.0, 0.0]), high=np.array([0.0, 0.0]), dtype=np.float)
 
-        goal_radius = get_ros_param_goal_tolerance(GOAL_RADIUS_DEFAULT)
+        goal_radius = rospy.get_param("%s/rl_agent/xy_goal_tolerance" % ns, GOAL_RADIUS_DEFAULT)
         super(RosEnvContImg, self).__init__(ns, state_collector, execution_mode, task_mode, state_size, observation_space, stack_offset, [], action_space, debug, goal_radius, WAYPOINT_RADIUS_DEFAULT, robot_radius, reward_fnc)
 
     def get_cmd_vel_(self, action):
