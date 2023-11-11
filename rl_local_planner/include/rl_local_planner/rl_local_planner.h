@@ -83,6 +83,7 @@ namespace rl_local_planner {
       
       // Publisher
       ros::Publisher trigger_agent_pub;
+      ros::Publisher marker_pub_;
 
       // Subscriber
       ros::Subscriber agent_action_sub_;
@@ -106,6 +107,8 @@ namespace rl_local_planner {
        * @retur sqrt(x^2 + y^2)
        */
       double metric_dist(double x, double y);
+
+      void publishMarkers(const geometry_msgs::PoseStamped& robot_pose, const tf2::Vector3& goal_transformed);
   };
 };
 #endif /* RL_LOCAL_PLANNER_H */

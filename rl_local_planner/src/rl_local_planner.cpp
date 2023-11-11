@@ -11,6 +11,8 @@
 
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
+#include <visualization_msgs/MarkerArray.h>
+
 PLUGINLIB_EXPORT_CLASS(rl_local_planner::RLLocalPlanner, nav_core::BaseLocalPlanner)
 namespace rl_local_planner {
 
@@ -34,10 +36,12 @@ namespace rl_local_planner {
 		std::string done_topic = "rl_agent/done";
 		std::string trigger_agent_topic = "trigger_agent";
 		std::string set_path_service_name = ros::this_node::getNamespace() + "/wp_generator/set_gobal_plan";
+		std::string markers_topic = "rl_agent/planner_markers";
 		nh_.param("rl_agent/action_topic", action_topic, action_topic);
 		nh_.param("rl_agent/done_topic", done_topic, done_topic);
 		nh_.param("rl_agent/trigger_agent_topic", trigger_agent_topic, trigger_agent_topic);
 		nh_.param("rl_agent/wp_generator_path_srv", set_path_service_name, set_path_service_name);
+		nh_.param("rl_agent/markers_topic", markers_topic, markers_topic);
 
 		action_topic = adjustTopicName(ros::this_node::getNamespace(), action_topic);
 		done_topic = adjustTopicName(ros::this_node::getNamespace(), done_topic);
@@ -57,6 +61,7 @@ namespace rl_local_planner {
 		
 		//Publisher
 		trigger_agent_pub = nh_.advertise<std_msgs::Bool>(trigger_agent_topic, 1, false);
+		marker_pub_ = nh_.advertise<visualization_msgs::MarkerArray>(markers_topic, 1, false);
 		
 		// Services
 		set_path_service_ = nh_.serviceClient<rl_msgs::SetPath>(set_path_service_name);
@@ -89,6 +94,8 @@ namespace rl_local_planner {
 			original_goal_transformed.getY() - robot_pose.pose.position.y,
 			original_goal_transformed.getZ() - robot_pose.pose.position.z
 		);
+
+		publishMarkers(robot_pose, original_goal_transformed);
 
 		double goal_dist = metric_dist(goal_global_frame_vector.getX(), goal_global_frame_vector.getY());
 		if (goal_dist < goal_threshold_) {
@@ -169,5 +176,54 @@ namespace rl_local_planner {
 	void RLLocalPlanner::done_callback_(const std_msgs::Bool& done){
 		done_ = done.data; 
 	}//done_callback_
+
+	void RLLocalPlanner::publishMarkers(
+		const geometry_msgs::PoseStamped& robot_pose,
+		const tf2::Vector3& goal_transformed
+	) {
+		if (marker_pub_.getNumSubscribers() == 0) {
+			return;
+		}
+
+		visualization_msgs::MarkerArray markers;
+
+		// goal original
+		visualization_msgs::Marker marker;
+		marker.header.frame_id = path_frame_;
+		marker.header.stamp = ros::Time::now();
+		marker.action = visualization_msgs::Marker::ADD;
+		marker.type = visualization_msgs::Marker::CUBE;
+		marker.ns = "goal original";
+		marker.pose.position.x = original_goal_.getX();
+		marker.pose.position.y = original_goal_.getY();
+		marker.pose.orientation.w = 1.0;
+		marker.color.r = 1.0;
+		marker.color.a = 1.0;
+		marker.scale.x = 0.2;
+		marker.scale.y = 0.2;
+		marker.scale.z = 0.2;
+		markers.markers.push_back(marker);
+
+		// goal transformed
+		marker.ns = "goal transformed";
+		marker.header.frame_id = costmap_->getGlobalFrameID();
+		marker.pose.position.x = goal_transformed.getX();
+		marker.pose.position.y = goal_transformed.getY();
+		marker.color.r = 0.0;
+		marker.color.g = 1.0;
+		markers.markers.push_back(marker);
+
+		// robot pose
+		marker.ns = "robot pose";
+		marker.header.frame_id = costmap_->getGlobalFrameID();
+		marker.pose.position.x = robot_pose.pose.position.x;
+		marker.pose.position.y = robot_pose.pose.position.y;
+		marker.color.r = 0.0;
+		marker.color.g = 0.0;
+		marker.color.b = 1.0;
+		markers.markers.push_back(marker);
+
+		marker_pub_.publish(markers);
+	}
 
 }; // namespace rl_local_planner
