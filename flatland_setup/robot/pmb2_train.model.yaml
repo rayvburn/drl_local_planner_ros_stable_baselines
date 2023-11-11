@@ -1,0 +1,56 @@
+# Reproduces the `robot1.model.yaml` config that was originally provided with the package
+#
+# It is appropriate for the `train` mode.
+# For the `exec` mode, look for the `pmb2_exec.model.yaml`
+
+bodies:  # List of named bodies
+  - name: base_footprint
+    pose: [0, 0, 0] 
+    type: dynamic  
+    color: [0.9, 0.9, 0.9, 1.0]
+    footprints:
+      - type: circle
+        sensor: true
+        radius: 0.275
+        density: 0
+        layers: ["all"]
+        collision: false
+
+plugins:
+  - type: DiffDrive 
+    name: diff_drive 
+    body: base_footprint
+    odom_frame_id: odom
+    odom_pub: odom  # topic odom is published on
+    pub_rate: 50
+
+  - type: ModelTfPublisher
+    name: tf_publisher
+    publish_tf_world: false
+  
+  # laser scan(s) for training
+  - type: Laser
+    name: static_laser
+    frame: static_laser_link
+    topic: static_laser
+    body: base_footprint
+    broadcast_tf: true
+    origin: [0.202, 0.0, 0.0]
+    range: 25
+    angle: {min: -1.91986000538, max: 1.91986000538, increment: 0.00577401509508}
+    noise_std_dev: 0.015
+    update_rate: 10
+    layers: ["static"]
+
+  - type: Laser
+    name: ped_laser
+    frame: ped_laser_link
+    topic: ped_laser
+    body: base_footprint
+    broadcast_tf: true
+    origin: [0.202, 0.0, 0.0]
+    range: 25
+    angle: {min: -1.91986000538, max: 1.91986000538, increment: 0.00577401509508}
+    noise_std_dev: 0.015
+    update_rate: 10
+    layers: ["ped"]
