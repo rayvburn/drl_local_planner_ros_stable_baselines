@@ -109,6 +109,8 @@ namespace rl_local_planner {
       double metric_dist(double x, double y);
 
       void publishMarkers(const geometry_msgs::PoseStamped& robot_pose, const tf2::Vector3& goal_transformed);
+
+      bool periodicEventWallTime(const ros::WallTime& begin, bool& event_occurred_flag, double period);
   };
 };
 #endif /* RL_LOCAL_PLANNER_H */

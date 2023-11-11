@@ -146,8 +146,18 @@ namespace rl_local_planner {
 
 		//Waiting for agents action
 		ros::WallRate r(1000);
+		//Periodic logging during the wait
+		auto action_wait_begin = ros::WallTime::now();
+		bool action_wait_logged = false;
 		while(!is_action_new_ && !done_){
 			r.sleep();
+			// throttled logging do not work well here as in the sim only the WallTime is progressing while we wait
+			if (!periodicEventWallTime(action_wait_begin, action_wait_logged, 5.0)) {
+				continue;
+			}
+			ROS_WARN(
+				"RLLocalPlanner is waiting for the action. In simulation it may be caused by the stopped ROS time."
+			);
 		}
 
 		is_action_new_ = false;
@@ -224,6 +234,22 @@ namespace rl_local_planner {
 		markers.markers.push_back(marker);
 
 		marker_pub_.publish(markers);
+	}
+
+	bool RLLocalPlanner::periodicEventWallTime(const ros::WallTime& begin, bool& event_occurred_flag, double period) {
+		int period_int = static_cast<int>(period);
+		int elapsed_int = static_cast<int>((ros::WallTime::now() - begin).toSec());
+
+		if (elapsed_int == 0) {
+			return false;
+		}
+		if (!event_occurred_flag && elapsed_int % period_int == 0) {
+			event_occurred_flag = true;
+			return true;
+		} else if (event_occurred_flag && elapsed_int % period_int != 0) {
+			event_occurred_flag = false;
+		}
+		return false;
 	}
 
 }; // namespace rl_local_planner
