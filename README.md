@@ -253,3 +253,5 @@ docker build -t ros-drl_local_planner .
 ## Fork information
 
 This fork is prepared to run local trajectory planning locally (without `Docker`).
+
+The main branch, `melodic-devel`, originates from [RGring/drl_local_planner_ros_stable_baselines](https://github.com/RGring/drl_local_planner_ros_stable_baselines)'s [`master`](https://github.com/RGring/drl_local_planner_ros_stable_baselines/commit/2ce7aa56c8789989b1326025c6d37f200ca3a029).
