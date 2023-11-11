@@ -30,7 +30,7 @@ namespace rl_local_planner {
 		// getting params from param server
 		nh_.getParam("rl_agent/robot_frame", robot_frame_);
 		nh_.getParam("rl_agent/train_mode", rl_mode_);
-		nh_.getParam("rl_agent/goal_threshold", goal_threshold_);
+		nh_.getParam("rl_agent/xy_goal_tolerance", goal_threshold_);
 		
 		std::string action_topic = "rl_agent/action";
 		std::string done_topic = "rl_agent/done";

@@ -9,7 +9,6 @@ xy_goal_tolerance: 0.4
 ###################################
 # planner parameters              #
 ###################################
-goal_threshold: 0.6
 num_of_wps: 8
 look_ahead_distance: 1.5
 wp_reached_dist: 0.2
