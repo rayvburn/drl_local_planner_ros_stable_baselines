@@ -147,6 +147,19 @@ if __name__ == '__main__':
         if ns == "/":
             ns = ""
 
+        print('')
+        print('[run_ppo.py] Running PPO with a non-default setup')
+        print('[run_ppo.py]     ns                 ' + ns)
+        print('[run_ppo.py]     agent_name         ' + str(sys.argv[2]))
+        print('[run_ppo.py]     policy             ' + str(sys.argv[3]))
+        print('[run_ppo.py]     mode               ' + str(sys.argv[4]))
+        print('[run_ppo.py]     debug              ' + str(sys.argv[5]))
+        print('[run_ppo.py]     normalize          ' + str(sys.argv[6]))
+        print('[run_ppo.py]     disc_action_space  ' + str(sys.argv[7]))
+        print('[run_ppo.py]     task_mode          ' + str(sys.argv[8]))
+        print('[run_ppo.py]     num_stacks         ' + str(sys.argv[9]))
+        print('')
+
         sc = StateCollector(ns, str(sys.argv[4]))
         run_ppo(config, sc,
                  ns=ns,
@@ -166,6 +179,20 @@ if __name__ == '__main__':
         ns = "sim1"
         policy = "CnnPolicy_multi_input_vel2"
         agent_name = "ppo2_35_8001000"
+
+        print('')
+        print('[run_ppo.py] Running PPO with a default setup')
+        print('[run_ppo.py]     ns                 ' + str(ns))
+        print('[run_ppo.py]     agent_name         ' + str(agent_name))
+        print('[run_ppo.py]     policy             ' + str(policy))
+        print('[run_ppo.py]     mode               ' + str(mode))
+        print('[run_ppo.py]     debug              ' + str(True))
+        print('[run_ppo.py]     normalize          ' + str(False))
+        print('[run_ppo.py]     disc_action_space  ' + str(True))
+        print('[run_ppo.py]     task_mode          ' + str("ped"))
+        print('[run_ppo.py]     num_stacks         ' + str(4))
+        print('[run_ppo.py]     stack_offset       ' + str(15))
+        print('')
 
         sc = StateCollector(ns, mode)
 
