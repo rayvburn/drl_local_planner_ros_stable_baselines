@@ -11,7 +11,3 @@
     local-name: drl_local_planner_forks/navigation
     uri: https://github.com/rayvburn/navigation_flatland.git
     version: flatland_integration_melodic_customized
-- git:
-    local-name: drl_local_planner_forks/stable-baselines
-    uri: https://github.com/RGring/stable-baselines.git
-    version: added_1d_conv_layer

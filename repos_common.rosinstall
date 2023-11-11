@@ -1,0 +1,5 @@
+# With ROS Melodic, this file must have a valid name before .rosinstall extension
+- git:
+    local-name: drl_local_planner_forks/stable-baselines
+    uri: https://github.com/RGring/stable-baselines.git
+    version: added_1d_conv_layer
