@@ -23,6 +23,7 @@ namespace rl_local_planner {
 
 		// params
 		tf_ = tf;
+		costmap_ = costmap_ros;
 
 		// getting params from param server
 		nh_.getParam("rl_agent/robot_frame", robot_frame_);
@@ -64,10 +65,9 @@ namespace rl_local_planner {
    	bool RLLocalPlanner::isGoalReached(){
 
 		geometry_msgs::TransformStamped transform;
-		try{
-		transform = tf_->lookupTransform(robot_frame_, path_frame_, ros::Time(0));
-		}
-		catch (tf2::TransformException ex){
+		try {
+			transform = tf_->lookupTransform(costmap_->getGlobalFrameID(), path_frame_, ros::Time(0));
+		} catch (tf2::TransformException ex){
 			ROS_ERROR("%s",ex.what());
 			ros::Duration(1.0).sleep();
 		}
@@ -78,10 +78,26 @@ namespace rl_local_planner {
 		tf2::Vector3 original_goal_transformed;
 		tf2::fromMsg(original_goal_transformed_geom, original_goal_transformed);
 
-		if(metric_dist(original_goal_transformed.getX(), original_goal_transformed.getY()) < goal_threshold_)
+		geometry_msgs::PoseStamped robot_pose;
+		if (!costmap_->getRobotPose(robot_pose)) {
+			ROS_ERROR("Cannot check whether the goal is reached because could not get a robot pose from the costmap");
+			return false;
+		}
+
+		tf2::Vector3 goal_global_frame_vector(
+			original_goal_transformed.getX() - robot_pose.pose.position.x,
+			original_goal_transformed.getY() - robot_pose.pose.position.y,
+			original_goal_transformed.getZ() - robot_pose.pose.position.z
+		);
+
+		double goal_dist = metric_dist(goal_global_frame_vector.getX(), goal_global_frame_vector.getY());
+		if (goal_dist < goal_threshold_) {
+			ROS_INFO("RLLocalPlanner reached the goal!");
 			return true;
+		}
 
 		if(done_){
+			ROS_INFO("RLLocalPlanner received 'done' flag while reaching the goal!");
 			done_ = false;
 			return true;
 		}

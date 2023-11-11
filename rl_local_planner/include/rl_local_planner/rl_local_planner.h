@@ -67,6 +67,7 @@ namespace rl_local_planner {
     private:
       // Class variables
       tf2_ros::Buffer* tf_;
+      costmap_2d::Costmap2DROS* costmap_;
       tf2::Vector3 original_goal_;                             // goal of global plan
       geometry_msgs::Twist action_;                           // most recent action
       std::string path_frame_;                                // name of path frame           
