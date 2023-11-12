@@ -1,4 +1,7 @@
 #! /bin/bash
+
+LOGPREFIX="[entrypoint_ppo2.sh]"
+
 #get config-params
 path_to_venv=$(awk -F "=" '/path_to_venv/ {print $2}' ../rl_bringup/config/path_config.ini)
 path_to_catkin_ws=$(awk -F "=" '/path_to_catkin_ws/ {print $2}' ../rl_bringup/config/path_config.ini)
@@ -12,7 +15,25 @@ source $path_to_venv/bin/activate
 agent_id=$1
 num_sims=$2
 
-INPUT=./training_params/ppo2_params.csv
+# Set default values for optional arguments if not provided
+params_csv="${3:-./training_params/ppo2_params.csv}"
+params_csv=$(realpath $params_csv)
+
+training_maps="${4:-./training_params/training_maps.csv}"
+training_maps=$(realpath $training_maps)
+
+robot_model_path="${5:-../flatland_setup/robot/robot1.model.yaml}"
+robot_model_path=$(realpath $robot_model_path)
+
+rl_params_path="${6:-../rl_bringup/config/rl_params_common.yaml}"
+rl_params_path=$(realpath $rl_params_path)
+
+echo "$LOGPREFIX Filesystem config:"
+echo "$LOGPREFIX * path_to_venv        $path_to_venv"
+echo "$LOGPREFIX * path_to_catkin_ws   $path_to_catkin_ws"
+echo "$LOGPREFIX * ros_ver             $ros_ver"
+
+INPUT=$params_csv
 OLDIFS=$IFS
 IFS=,
 [ ! -f $INPUT ] && { echo "$INPUT file not found"; }
@@ -28,7 +49,7 @@ then
 fi
 
 # Loading training maps
-MAPS=./training_params/training_maps.csv
+MAPS=$training_maps
 maps=()
 while read map
 do
@@ -38,6 +59,15 @@ do
     fi
     maps+=($map)
 done < $MAPS
+
+echo "$LOGPREFIX Training setup:"
+echo "$LOGPREFIX * agent_id            $agent_id"
+echo "$LOGPREFIX * num_sims            $num_sims"
+echo "$LOGPREFIX * params_csv          $params_csv"
+echo "$LOGPREFIX * training_maps       $training_maps"
+echo "$LOGPREFIX * robot_model_path    $robot_model_path"
+echo "$LOGPREFIX * rl_params_path      $rl_params_path"
+echo "$LOGPREFIX * maps                $maps"
 
 while read agent_name total_timesteps policy gamma n_steps ent_coef learning_rate vf_coef max_grad_norm lam nminibatches noptepochs cliprange robot_radius rew_fnc num_stacks stack_offset disc_action_space normalize stage pretrained_model_path task_mode
 do
@@ -49,15 +79,14 @@ do
 
     if [ "$agent_name" = "$agent_id" ] || [ "$agent_id" = "all" ];
     then
-        echo "$agent_name"
-        echo "$policy"
+        echo "$LOGPREFIX Starting training for agent '$agent_name' with a policy '$policy'"
 
         # Starting num_sims simulations with different maps.
         i_map=0
         for ((i=1;i<=$num_sims;i++));
         do
-            echo "${maps[i_map]}"
-            screen -dmS ros_sim$i bash -c "source ./ros.sh sim$i $policy ${maps[i_map]}"
+            echo "$LOGPREFIX Training using map '${maps[i_map]}'"
+            screen -dmS ros_sim$i bash -c "source ./ros.sh sim$i $policy ${maps[i_map]} $robot_model_path $rl_params_path"
             screen -S ros_sim$i -X logfile screenlog_"$agent_name"_ros_sim$i.log
             screen -S ros_sim$i -X log
             i_map=$((i_map+1))
@@ -76,7 +105,7 @@ do
         # Wait until training is done
         while (screen -list | grep -q "python");
         do
-        echo "sleep"
+        echo -n "."
         sleep 5
         done
 
