@@ -24,7 +24,8 @@ if __name__ == '__main__':
   rl_mode = rospy.get_param(train_mode_param, 0)
 
   keep_clock_running = False
-  if rl_mode == 2:
+  # mode 2 is 'exec_rw' (legacy?) and mode 1 is 'train'
+  if rl_mode == 2 or rl_mode == 1:
     keep_clock_running = True
 
   n_sec = 10.0
