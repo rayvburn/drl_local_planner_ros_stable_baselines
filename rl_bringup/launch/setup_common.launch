@@ -47,6 +47,7 @@
     <!-- It launches a specific PPO agent after activating the virtualenv of the package -->
     <!-- It is crucial to pass all the remaps (of the given launch file) within the quotes -->
     <node pkg="rl_bringup" type="run_ppo_agent.sh" name="ppo_launcher" output="screen" required="true"
+        unless="$(eval mode == 'train')"
         args="$(arg agent_launch_pkg) $(arg agent_launch_name) &quot;mode:=$(arg mode) ns:=$(arg ns)&quot;"
     />
 </launch>
