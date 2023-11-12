@@ -353,8 +353,16 @@ class TaskGenerator():
         pose.x = x
         pose.y = y
         pose.theta = theta
-        rospy.wait_for_service('%s/move_model' % self.NS)
-        self.__move_robot_to('robot_1', pose)
+        self.__move_robot_to.wait_for_service(10.0)
+        # robot name must match the model name given to flatland spawning service
+        resp = self.__move_robot_to('robot_1', pose)
+        if not resp.success:
+            print(
+                "\033[91m"
+                + "MoveModel service returned failure with a message: "
+                + str(resp.message)
+                + "\033[0m"
+            )
         self.take_sim_step()
         self.__pub_initial_position(x, y, theta)
 
