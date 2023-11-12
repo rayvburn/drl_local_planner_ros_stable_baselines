@@ -255,3 +255,20 @@ docker build -t ros-drl_local_planner .
 This fork is prepared to run local trajectory planning locally (without `Docker`).
 
 The main branch, `melodic-devel`, originates from [RGring/drl_local_planner_ros_stable_baselines](https://github.com/RGring/drl_local_planner_ros_stable_baselines)'s [`master`](https://github.com/RGring/drl_local_planner_ros_stable_baselines/commit/2ce7aa56c8789989b1326025c6d37f200ca3a029).
+
+## Training locally from scratch
+
+Training for a custom robot definition ([PMB2 mobile base](https://blog.pal-robotics.com/ros-simulation-for-pmb-2-tiagos-mobile-base/)) can be launched with:
+
+```sh
+cd drl_local_planner_ros_stable_baselines/start_scripts
+./train_pmb2.sh
+```
+
+The custom robot configuration has different laser scanner parameters and dimensions.
+
+After the finished training:
+
+```sh
+./close_training_session.sh
+```
