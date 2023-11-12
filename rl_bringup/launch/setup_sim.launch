@@ -24,7 +24,8 @@
     <arg name="update_rate" default="10000"/>
 	<arg name="map_path" default="$(find flatland_setup)/maps/map_middle_complexity"/>
     <arg name="robot_model_path" default="$(find flatland_setup)/robot/robot1_exec.model.yaml"/>
-    <arg name="robot_name" default="robot1"/>
+    <!-- corresponds to the name of the robot in the flatland simulator; hard-coded somewhere in the `rl_agent` -->
+    <arg name="robot_name" value="robot_1"/>
     <!-- 2D pose to spawn the robot at - position (x, y) and orientation (alpha) -->
     <arg name="spawn_pose_x" default="5.0"/>
     <arg name="spawn_pose_y" default="6.0"/>

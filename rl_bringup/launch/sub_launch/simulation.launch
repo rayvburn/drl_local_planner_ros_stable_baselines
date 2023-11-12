@@ -3,7 +3,7 @@
     <arg name="map_path"/> 
     <arg name="update_rate"/>
     <arg name="robot_model_path" default="$(find flatland_setup)/robot/robot1.model.yaml"/>
-    <arg name="robot_name" default="robot1"/>
+    <arg name="robot_name" default="robot_1"/>
 
     <arg name="spawn_pose_x" default="5.0"/>
     <arg name="spawn_pose_y" default="6.0"/>
