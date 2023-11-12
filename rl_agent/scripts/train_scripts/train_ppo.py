@@ -176,7 +176,8 @@ def train_agent_ppo2(config, agent_name, total_timesteps, policy,
     if stage==0:
         reset_num_timesteps = True
 
-    model.learn(total_timesteps=total_timesteps, log_interval=100, callback=train_callback, tb_log_name=agent_name, reset_num_timesteps=reset_num_timesteps)
+    print("Starting the training.")
+    model.learn(total_timesteps=total_timesteps, log_interval=1, callback=train_callback, tb_log_name=agent_name, reset_num_timesteps=reset_num_timesteps)
 
     # Saving final model
     model.save("%s/%s/%s" % (path_to_models, agent_name, "%s_stage_%d" % (agent_name, stage)))
