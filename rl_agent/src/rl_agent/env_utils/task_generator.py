@@ -14,6 +14,7 @@ from pyquaternion import Quaternion
 import numpy as np
 from collections import deque
 import pickle
+import threading
 
 #ros-relevant
 import rospy
@@ -638,8 +639,30 @@ class TaskGenerator():
         """
         srv = SetBool()
         srv.data = True
-        rospy.wait_for_service('%s/pedsim_simulator/remove_all_peds' % self.NS)
-        self.__remove_all_peds_srv.call(srv.data)
+
+        # rospy.wait_for_service(pedsim_service)
+        def call_remove_all_peds_service():
+            self.__remove_all_peds_srv.call(srv.data)
+
+        self.__remove_all_peds_srv.wait_for_service(timeout=5.0)
+
+        # call a service in a separate thread as it often blocks the system bringup forever (in training mode)
+        # ref: https://stackoverflow.com/a/14924210
+        t = threading.Thread(target=call_remove_all_peds_service)
+        t.start()
+        # Wait for a few seconds or until the process finishes
+        t.join(5)
+        # If thread is still active
+        if t.is_alive():
+            print(
+                "\033[91m"
+                + "Could not get a response from pedsim service for removing all peds "
+                + "(" + str(self.__remove_all_peds_srv.resolved_name) + "). "
+                + "Calling flatland's `step` service manually may help with being stuck here."
+                + "\033[0m"
+            )
+            t.join()
+
         self.__peds = []
         return
 
