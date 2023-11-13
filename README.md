@@ -256,6 +256,8 @@ This fork is prepared to run local trajectory planning locally (without `Docker`
 
 The main branch, `melodic-devel`, originates from [RGring/drl_local_planner_ros_stable_baselines](https://github.com/RGring/drl_local_planner_ros_stable_baselines)'s [`master`](https://github.com/RGring/drl_local_planner_ros_stable_baselines/commit/2ce7aa56c8789989b1326025c6d37f200ca3a029).
 
+For running the RL agent on a real robot or with a simulator like `Gazebo`, only dependencies listed in `repos_common.rosinstall` are necessary. However, if one wants to use the `flatland` simulator, the packages listed in `repos_sim.rosinstall` must be cloned to the workspace too.
+
 ## Training locally from scratch
 
 Training for a custom robot definition ([PMB2 mobile base](https://blog.pal-robotics.com/ros-simulation-for-pmb-2-tiagos-mobile-base/)) can be launched with:
