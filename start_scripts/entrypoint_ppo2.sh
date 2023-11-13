@@ -5,6 +5,7 @@ LOGPREFIX="[entrypoint_ppo2.sh]"
 #get config-params
 path_to_venv=$(awk -F "=" '/path_to_venv/ {print $2}' ../rl_bringup/config/path_config.ini)
 path_to_catkin_ws=$(awk -F "=" '/path_to_catkin_ws/ {print $2}' ../rl_bringup/config/path_config.ini)
+path_to_models=$(awk -F "=" '/path_to_models/ {print $2}' ../rl_bringup/config/path_config.ini)
 ros_ver=$(awk -F "=" '/ros_version/ {print $2}' ../rl_bringup/config/path_config.ini)
 
 # source ros stuff
@@ -68,6 +69,13 @@ echo "$LOGPREFIX * training_maps       $training_maps"
 echo "$LOGPREFIX * robot_model_path    $robot_model_path"
 echo "$LOGPREFIX * rl_params_path      $rl_params_path"
 echo "$LOGPREFIX * maps                $maps"
+
+if [ -d "$path_to_models/$agent_id" ];
+then
+    # copy a directory with the previously learned model
+    backup_name="${path_to_models}/${agent_id}_backup_$(date +'%Y-%m-%d_%H-%M-%S')"
+    cp -R "$path_to_models/$agent_id" $backup_name
+fi
 
 while read agent_name total_timesteps policy gamma n_steps ent_coef learning_rate vf_coef max_grad_norm lam nminibatches noptepochs cliprange robot_radius rew_fnc num_stacks stack_offset disc_action_space normalize stage pretrained_model_path task_mode
 do
