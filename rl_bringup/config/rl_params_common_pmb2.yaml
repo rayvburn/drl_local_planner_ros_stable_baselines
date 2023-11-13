@@ -32,8 +32,9 @@ img_height: 70
 resolution: 0.15
 
 # State representation - laser scan
-# this must be equal to the laser's: [(angle.max - angle.min)  / angle.increment]
-scan_size: 665
+# this must be equal to the laser's: [(angle.max - angle.min)  / angle.increment];
+# verify whether number of scan samples in your robot matches number of samples produced by the flatland (may be +/-1)
+scan_size: 666
 # scan is discretized to a resolution
 resolution: 0.05
 
