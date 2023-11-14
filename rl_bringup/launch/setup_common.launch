@@ -23,11 +23,17 @@
     <arg name="mode_enum" if="$(eval mode == 'exec')" value="0"/>
     <arg name="mode_enum" if="$(eval mode == 'train')" value="1"/>
     <arg name="mode_enum" if="$(eval mode == 'exec_rw')" value="2"/>
+    <!-- Mode-specific parameters -->
+    <arg name="params_file_mode" default="$(find rl_bringup)/config/rl_params_$(arg mode).yaml"/>
 
     <!-- Set parameters shared among the launched nodes -->
     <param name="$(arg ns)/rl_agent/state_mode" value="$(arg state_enum)"/>
     <param name="$(arg ns)/rl_agent/train_mode" value="$(arg mode_enum)"/>
     <rosparam ns="$(arg ns)/rl_agent" file="$(arg params_file)" command="load" />
+
+    <rosparam if="$(eval mode == 'exec')" ns="$(arg ns)/rl_agent/execution" file="$(arg params_file_mode)" command="load" />
+    <rosparam if="$(eval mode == 'exec_rw')" ns="$(arg ns)/rl_agent/execution" file="$(arg params_file_mode)" command="load" />
+    <rosparam if="$(eval mode == 'train')" ns="$(arg ns)/rl_agent/train" file="$(arg params_file_mode)" command="load" />
 
     <!-- RL infrastructure-->
     <!-- nodes will be launched within the specified namespace -->

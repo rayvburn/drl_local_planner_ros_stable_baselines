@@ -15,7 +15,6 @@
 
     <!-- (exec|train|exec_rw) -->
     <arg name="mode" default="exec"/>
-    <arg name="params_file_mode" default="$(find rl_bringup)/config/rl_params_$(arg mode).yaml"/>
 
     <!-- (image|scan) -->
     <arg name="state_representation" default="scan"/>
@@ -36,9 +35,6 @@
 
     <!-- Shared parameters -->
     <param name="use_sim_time" value="true"/>
-    <rosparam if="$(eval mode == 'exec')" ns="$(arg ns)/rl_agent/execution" file="$(arg params_file_mode)" command="load" />
-    <rosparam if="$(eval mode == 'exec_rw')" ns="$(arg ns)/rl_agent/execution" file="$(arg params_file_mode)" command="load" />
-    <rosparam if="$(eval mode == 'train')" ns="$(arg ns)/rl_agent/train" file="$(arg params_file_mode)" command="load" />
 
     <!-- Launches RL infrastructure's components -->
     <include file="$(find rl_bringup)/launch/setup_common.launch">
