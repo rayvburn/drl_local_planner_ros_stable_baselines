@@ -260,6 +260,8 @@ For running the RL agent on a real robot or with a simulator like `Gazebo`, only
 
 ## Training locally from scratch
 
+Before training, make sure that your laser scans are merged correctly, i.e., the scan merged from 2 scans has the same size as a single scan. The `StateCollector` class expects 2 scans of the robot to be merged (and this is hard-coded), but in the original application (`robot1`), the merged scan has exactly 90 samples (as both input scans). For a custom robot, one may want to duplicate a single scan, but there may be an issue with the `MergeScans` service server, which could produce an invalid number of samples.
+
 Training for a custom robot definition ([PMB2 mobile base](https://blog.pal-robotics.com/ros-simulation-for-pmb-2-tiagos-mobile-base/)) can be launched with:
 
 ```sh
