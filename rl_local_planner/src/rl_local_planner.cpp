@@ -77,11 +77,22 @@ namespace rl_local_planner {
 			ros::Duration(1.0).sleep();
 		}
 
-		// cannot transform tf2::Vector3 directly
-		geometry_msgs::Vector3 original_goal_transformed_geom;
-		tf2::doTransform(tf2::toMsg(original_goal_), original_goal_transformed_geom, transform);
-		tf2::Vector3 original_goal_transformed;
-		tf2::fromMsg(original_goal_transformed_geom, original_goal_transformed);
+		geometry_msgs::PoseStamped goal_pose_original;
+		goal_pose_original.header.frame_id = path_frame_;
+		goal_pose_original.header.stamp = ros::Time::now();
+		goal_pose_original.pose.position.x = original_goal_.getX();
+		goal_pose_original.pose.position.y = original_goal_.getY();
+		goal_pose_original.pose.position.z = original_goal_.getZ();
+		// goal orientation is neglected by the planner
+		goal_pose_original.pose.orientation.w = 1.0;
+
+		geometry_msgs::PoseStamped goal_pose_transformed;
+		tf2::doTransform(goal_pose_original, goal_pose_transformed, transform);
+		tf2::Vector3 original_goal_transformed(
+			goal_pose_transformed.pose.position.x,
+			goal_pose_transformed.pose.position.y,
+			goal_pose_transformed.pose.position.z
+		);
 
 		geometry_msgs::PoseStamped robot_pose;
 		if (!costmap_->getRobotPose(robot_pose)) {
