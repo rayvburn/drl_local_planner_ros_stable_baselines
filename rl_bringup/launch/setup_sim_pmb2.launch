@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<launch>
+    <!--
+        Launches the trained policy with the custom robot. Since the custom robot has a different laser scan
+        configuration than the mobile base that the policy was trained with, the adapter nodes adjust
+        the input scan to convert the sensor readings to the form expected by the policy
+    -->
+    <arg name="ns" default="/"/>
+    <arg name="visualize" default="True" />
+
+    <include file="$(find rl_bringup)/launch/setup_sim.launch">
+        <arg name="ns" value="$(arg ns)" />
+        <arg name="visualize" value="$(arg visualize)" />
+        <arg name="robot_model_path" value="$(find flatland_setup)/robot/pmb2_exec.model.yaml" />
+        <arg name="mode" value="exec" />
+
+        <!-- Common params define, e.g., the expected state representation -->
+        <arg name="state_representation" value="scan"/>
+        <arg name="params_file_common" value="$(find rl_bringup)/config/rl_params_common.yaml" />
+        <!-- Specify the name of the launch file in the package given by agent_launch_pkg -->
+        <arg name="agent_launch_pkg" default="rl_agent"/>
+        <arg name="agent_launch_name" default="run_1_raw_cont.launch"/>
+    </include>
+
+    <!-- Parameters of the adjusted scan selected according to the policy params -->
+    <!-- The node is implemented in https://github.com/rayvburn/drl_local_planner_ros_interface -->
+    <node pkg="drl_local_planner_ros_interface" type="laser_scan_adapter_node" name="scan_adapter_front">
+        <remap from="/scan" to="$(arg ns)/f_scan_raw" />
+        <remap from="/scan_adjusted" to="$(arg ns)/f_scan" />
+        <param name="ranges_num" value="90" />
+        <param name="angle_increment" value="0.06981317007" />
+		<param name="angle_min" value="-3.141592653589793238462643383279502884197" />
+		<param name="angle_max" value="+3.141592653589793238462643383279502884197" />
+    </node>
+    <node pkg="drl_local_planner_ros_interface" type="laser_scan_adapter_node" name="scan_adapter_rear">
+        <remap from="/scan" to="$(arg ns)/f_scan_raw" />
+        <remap from="/scan_adjusted" to="$(arg ns)/b_scan" />
+        <param name="ranges_num" value="90" />
+        <param name="angle_increment" value="0.06981317007" />
+		<param name="angle_min" value="-3.141592653589793238462643383279502884197" />
+		<param name="angle_max" value="+3.141592653589793238462643383279502884197" />
+    </node>
+
+    <!-- Adjust the size of the robot footprint -->
+    <param name="$(arg ns)/move_base/global_costmap/robot_radius" value="0.275" />
+    <param name="$(arg ns)/move_base/local_costmap/robot_radius" value="0.275" />
+</launch>

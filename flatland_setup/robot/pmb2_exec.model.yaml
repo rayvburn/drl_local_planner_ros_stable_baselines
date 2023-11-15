@@ -41,7 +41,10 @@ plugins:
   - type: Laser
     name: front_laser
     frame: front_laser_link
-    topic: f_scan
+    # The suffix `_raw` was added to not publish directly to the topic that is subscribed by the StateCollector.
+    # Therefore, the `f_scan_raw` scan should be transformed to a form expected by the policy (if it was trained
+    # on another robot). Topic can be renamed to `f_scan` if the system uses policy trained on the PMB2 mobile base.
+    topic: f_scan_raw
     body: base_footprint
     broadcast_tf: true
     origin: [0.202, 0.0, 0.0]
