@@ -29,7 +29,7 @@ from nav_msgs.msg import OccupancyGrid
 # Helper classes
 from rl_agent.env_utils.debug_ros_env import DebugRosEnv
 from rl_agent.env_utils.reward_container import RewardContainer
-from rl_agent.env_utils.task_generator import TaskGenerator
+# originally TaskGenerator was imported here - see details below
 from rl_agent.common_utils import adjust_topic_name
 
 class RosEnvAbs(gym.Env):
@@ -86,6 +86,10 @@ class RosEnvAbs(gym.Env):
         if self.debug_:
             self.debugger_ = DebugRosEnv(self.NS, stack_offset)
         if self.MODE == "train" or self.MODE == "eval":
+            # TaskGenerator imports multiple sim-specific modules; to create a clean exec-only setup, importing
+            # the TaskGenerator was made conditional here
+            from rl_agent.env_utils.task_generator import TaskGenerator
+
             if len(self.action_space.shape) == 0:
                 self.__reward_cont = RewardContainer(self.NS, robot_radius, goal_radius, self.v_max_)
             else:
