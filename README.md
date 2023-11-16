@@ -276,3 +276,34 @@ After the finished training:
 ```sh
 ./close_training_session.sh
 ```
+
+Beware that the startup of learning of a pre-trained agent (tested with `ppo2_1_raw_data_disc_0_pretrained` agent) using the `start_scripts/train_pmb2_pretrained.sh` script ends quickly with the following error:
+
+<details><summary>click to see the details...</summary>
+<p>
+
+```console
+Traceback (most recent call last):
+  File "../rl_agent/scripts/train_scripts/train_ppo.py", line 264, in <module>
+    task_mode=str(sys.argv[22]), num_envs=int(sys.argv[23]))
+  File "../rl_agent/scripts/train_scripts/train_ppo.py", line 189, in train_agent_ppo2
+    tensorboard_log='%s'%(path_to_tensorboard_log))
+  File "<PATH_TO_WORKSPACE>/src/drl_local_planner_ros_stable_baselines/.venv/lib/python3.6/site-packages/stable_baselines/common/base_class.py", line 885, in load
+    model.set_env(env)
+  File "<PATH_TO_WORKSPACE>/src/drl_local_planner_ros_stable_baselines/.venv/lib/python3.6/site-packages/stable_baselines/common/base_class.py", line 112, in set_env
+    assert self.observation_space == env.observation_space, \
+  File "<PATH_TO_WORKSPACE>/src/drl_local_planner_ros_stable_baselines/.venv/lib/python3.6/site-packages/gym/spaces/box.py", line 57, in __eq__
+    return isinstance(other, Box) and np.allclose(self.low, other.low) and np.allclose(self.high, other.high)
+  File "<__array_function__ internals>", line 6, in allclose
+  File "<PATH_TO_WORKSPACE>/src/drl_local_planner_ros_stable_baselines/.venv/lib/python3.6/site-packages/numpy/core/numeric.py", line 2171, in allclose
+    res = all(isclose(a, b, rtol=rtol, atol=atol, equal_nan=equal_nan))
+  File "<__array_function__ internals>", line 6, in isclose
+  File "<PATH_TO_WORKSPACE>/src/drl_local_planner_ros_stable_baselines/.venv/lib/python3.6/site-packages/numpy/core/numeric.py", line 2272, in isclose
+    return within_tol(x, y, atol, rtol)
+  File "<PATH_TO_WORKSPACE>/src/drl_local_planner_ros_stable_baselines/.venv/lib/python3.6/site-packages/numpy/core/numeric.py", line 2258, in within_tol
+    return less_equal(abs(x-y), atol + rtol * abs(y))
+ValueError: operands could not be broadcast together with shapes (1,681,1) (1,106,1)
+```
+
+</p>
+</details>

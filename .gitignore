@@ -10,3 +10,9 @@
 rl_bringup/config/path_config.ini
 
 rl_agent/build/
+
+# Temp files created in the start_scripts/train_pmb2_pretrained.sh
+start_scripts/training_params/ppo2_params_pmb2_pretrained.csv
+start_scripts/training_params/training_maps_pmb2_pretrained.csv
+rl_bringup/config/rl_params_common_pmb2_pretrained.yaml
+flatland_setup/robot/pmb2_train_pretrained.model.yaml
