@@ -22,7 +22,7 @@ from flatland_msgs.msg import DebugTopicList
 from rosgraph_msgs.msg import Clock
 from pedsim_msgs.msg import AgentStates
 from visualization_msgs.msg import MarkerArray, Marker
-from rl_agent.common_utils import adjust_topic_name, get_ros_param_footprint_circumradius
+from rl_agent.common_utils import adjust_topic_name
 
 class Evaluation():
     '''
@@ -44,7 +44,7 @@ class Evaluation():
         self.__NS = ns
         self.__clock = Clock().clock
 
-        robot_circumradius = get_ros_param_footprint_circumradius(0.46)
+        robot_circumradius = rospy.get_param("%s/rl_agent/execution/robot_radius" % ns, 0.46)
         self.__task_generator = TaskGenerator(self.__NS, self.__state_collector, robot_circumradius)
         self.__recent_agent_states = []
 

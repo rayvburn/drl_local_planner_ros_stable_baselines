@@ -1,3 +1,4 @@
 # Loaded i.a. by the StateCollector class
 scan_front_topic: f_scan
 scan_rear_topic: b_scan
+robot_radius: 0.46
