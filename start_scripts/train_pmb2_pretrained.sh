@@ -40,6 +40,13 @@ params_common_mod_file="../rl_bringup/config/rl_params_common_pmb2_pretrained.ya
 cp -rf $params_common_orig_file $params_common_mod_file
 # Using sed to replace the line with 'scan_size: '
 sed -i '/scan_size:/c\scan_size: 90' $params_common_mod_file
+# Define the YAML content to be appended
+yaml_content="\
+\n\
+execution:\n\
+  robot_radius: 0.275"
+# Append YAML content to the file
+sed -i -e "\$a\\$yaml_content" $params_common_mod_file
 
 # Start training
 ./entrypoint_ppo2.sh \

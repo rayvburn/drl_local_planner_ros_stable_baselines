@@ -42,6 +42,5 @@
     </node>
 
     <!-- Adjust the size of the robot footprint -->
-    <param name="$(arg ns)/move_base/global_costmap/robot_radius" value="0.275" />
-    <param name="$(arg ns)/move_base/local_costmap/robot_radius" value="0.275" />
+    <param name="$(arg ns)/rl_agent/execution/robot_radius" value="0.275" />
 </launch>
