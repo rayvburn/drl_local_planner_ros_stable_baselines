@@ -37,7 +37,15 @@ class RosEnvContImgVel(RosEnvImgVel):
         img_height = rospy.get_param("%s/rl_agent/img_height" % ns)
         state_size = (img_height + 1, img_width , 1)
         observation_space = spaces.Box(low=0, high=100, shape=state_size, dtype=np.float)
-        action_space = spaces.Box(low=np.array([0.0, -0.7]), high=np.array([0.5, 0.7]), dtype=np.float)
+
+        self.v_max_ = rospy.get_param("%s/rl_agent/max_vel_x" % ns, 0.5)
+        self.w_max_ = rospy.get_param("%s/rl_agent/max_vel_th" % ns, 0.7)
+        action_space = spaces.Box(
+            low=np.array([0.0, -self.w_max_]),
+            high=np.array([self.v_max_, self.w_max_]),
+            dtype=np.float
+        )
+
         goal_radius = rospy.get_param("%s/rl_agent/xy_goal_tolerance" % ns, GOAL_RADIUS_DEFAULT)
         super(RosEnvContImgVel, self).__init__(ns, state_collector, execution_mode, task_mode, state_size, observation_space, stack_offset, [], action_space, debug, goal_radius, WAYPOINT_RADIUS_DEFAULT, robot_radius, reward_fnc)
 
