@@ -21,6 +21,7 @@ import rospy
 
 # messages
 from std_msgs.msg import Bool
+from std_msgs.msg import Float64MultiArray, MultiArrayDimension
 from sensor_msgs.msg import LaserScan
 from rl_msgs.msg import Waypoint
 from geometry_msgs.msg import TwistStamped, Twist, Pose
@@ -98,14 +99,21 @@ class RosEnvAbs(gym.Env):
 
         trigger_agent_topic = rospy.get_param("%s/rl_agent/trigger_agent_topic" % (self.NS), "%s/trigger_agent" % (self.NS))
         action_topic = rospy.get_param("%s/rl_agent/action_topic" % (self.NS), "%s/rl_agent/action" % (self.NS))
+        comp_time_topic = rospy.get_param("%s/rl_agent/computation_time_topic" % (self.NS), "%s/rl_agent/computation_time" % (self.NS))
         trigger_agent_topic = adjust_topic_name(self.NS, trigger_agent_topic)
         action_topic = adjust_topic_name(self.NS, action_topic)
+        comp_time_topic = adjust_topic_name(self.NS, comp_time_topic)
 
         # Subscriber
         self.__trigger_sub = rospy.Subscriber(trigger_agent_topic, Bool, self.__trigger_callback)
 
         # Publisher
         self.__agent_action_pub = rospy.Publisher(action_topic, Twist, queue_size=1)
+
+        # evaluate computation times
+        self.comp_time_pub = rospy.Publisher(comp_time_topic, Float64MultiArray, queue_size=1)
+        self.comp_time_start = rospy.Time(0)
+        self.comp_time_finish = rospy.Time(0)
 
         # Sleeping so that py-Publisher has time to setup!
         time.sleep(2)
@@ -122,6 +130,10 @@ class RosEnvAbs(gym.Env):
         self.__agent_action_pub.publish(action)
         # print("publish cmd_vel: %f"%(time.time() - start))
 
+        # publishing of the action ends our control loop
+        self.comp_time_finish = rospy.Time.now()
+        self.publish_computation_time()
+
         # waiting for robot-cycle to end
         begin = time.time()
         while not self.__trigger:
@@ -135,6 +147,9 @@ class RosEnvAbs(gym.Env):
             time.sleep(0.00001)
         self.__trigger = False
         # print("waiting for BaseLocalPlanner: %f"%(time.time() - begin))
+
+        # a trigger message has been received so we are ready to start counting the duration of the control loop
+        self.comp_time_start = rospy.Time.now()
 
         # start = time.time()
         self.__collect_state()
@@ -371,3 +386,24 @@ class RosEnvAbs(gym.Env):
         :return: action size
         """
         return self.ACTION_SIZE
+
+    def publish_computation_time(self):
+        if self.comp_time_start.is_zero():
+            # we'll won't publish - this is probably the first iteration
+            return
+        computation_time = self.comp_time_finish - self.comp_time_start
+        msg = Float64MultiArray()
+        msg.data = [float(self.comp_time_start.to_sec()), float(computation_time.to_sec())]
+
+        msg.layout.data_offset = 0
+        dim_stamp = MultiArrayDimension()
+        dim_stamp.label = 'stamp'
+        dim_stamp.size = 1
+        dim_stamp.stride = 1
+        msg.layout.dim.append(dim_stamp)
+        dim_ct = MultiArrayDimension()
+        dim_ct.label = 'computation_time'
+        dim_ct.size = 1
+        dim_ct.stride = 1
+        msg.layout.dim.append(dim_ct)
+        self.comp_time_pub.publish(msg)
