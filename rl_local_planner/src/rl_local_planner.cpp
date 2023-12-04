@@ -8,6 +8,7 @@
 #include <pluginlib/class_list_macros.h>
 #include <rl_local_planner/rl_local_planner.h>
 #include <rl_local_planner/utils.h>
+#include <base_local_planner/costmap_model.h>
 
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
@@ -16,7 +17,7 @@
 PLUGINLIB_EXPORT_CLASS(rl_local_planner::RLLocalPlanner, nav_core::BaseLocalPlanner)
 namespace rl_local_planner {
 
-	RLLocalPlanner::RLLocalPlanner(): nh_(){
+	RLLocalPlanner::RLLocalPlanner(): nh_(), odom_helper_("odom") {
 
 	}//RLLocalPlanner
 
@@ -26,6 +27,7 @@ namespace rl_local_planner {
 		// params
 		tf_ = tf;
 		costmap_ = costmap_ros;
+		planner_util_.initialize(tf_, costmap_ros->getCostmap(), costmap_ros->getGlobalFrameID());
 
 		// getting params from param server
 		nh_.getParam("rl_agent/robot_frame", robot_frame_);
@@ -65,6 +67,40 @@ namespace rl_local_planner {
 		
 		// Services
 		set_path_service_ = nh_.serviceClient<rl_msgs::SetPath>(set_path_service_name);
+
+		// section specific to the stop and rotate controller (ported from the "external_local_planner")
+		ros::NodeHandle private_nh("~/" + name);
+		std::string odom_topic;
+		if (private_nh.getParam("odom_topic", odom_topic)) {
+			odom_helper_.setOdomTopic(odom_topic);
+		}
+		// parameters used by the stop&rotate controller (+ latch_xy_goal_tolerance)
+		base_local_planner::LocalPlannerLimits limits;
+		private_nh.param<double>("max_vel_theta", limits.max_vel_theta, 1.20);
+		private_nh.param<double>("min_vel_theta", limits.min_vel_theta, 1.20);
+		private_nh.param<double>("acc_lim_x", limits.acc_lim_x, 1.0);
+		// differential drive
+		private_nh.param<double>("acc_lim_y", limits.acc_lim_y, 0.0);
+		private_nh.param<double>("acc_lim_theta", limits.acc_lim_theta, 1.0);
+		private_nh.param<double>("acc_lim_trans", limits.acc_lim_trans, limits.acc_lim_x);
+		private_nh.param<double>("xy_goal_tolerance", limits.xy_goal_tolerance, 0.4);
+		// by default, goal orientation is not considered at all
+		private_nh.param<double>("yaw_goal_tolerance", limits.yaw_goal_tolerance, M_PI);
+		private_nh.param<double>("trans_stopped_vel", limits.trans_stopped_vel, 0.1);
+		private_nh.param<double>("theta_stopped_vel", limits.theta_stopped_vel, 0.1);
+		planner_util_.reconfigureCB(limits, false);
+
+		std::string controller_frequency_param;
+		private_nh.searchParam("controller_frequency", controller_frequency_param);
+		double controller_frequency = 10.0; // default
+		if (private_nh.param(controller_frequency_param, controller_frequency, controller_frequency)) {
+			sim_period_ = 1.0 / controller_frequency;
+			ROS_INFO(
+				"Sim period set to %6.3f s. Computed based on `controller_frequency` which is %6.3f Hz",
+				sim_period_,
+				controller_frequency
+			);
+		}
 	} //initialize
 
    	bool RLLocalPlanner::isGoalReached(){
@@ -108,18 +144,25 @@ namespace rl_local_planner {
 
 		publishMarkers(robot_pose, original_goal_transformed);
 
-		double goal_dist = metric_dist(goal_global_frame_vector.getX(), goal_global_frame_vector.getY());
-		if (goal_dist < goal_threshold_) {
-			ROS_INFO("RLLocalPlanner reached the goal!");
-			return true;
-		}
-
 		if(done_){
 			ROS_INFO("RLLocalPlanner received 'done' flag while reaching the goal!");
 			done_ = false;
 			return true;
 		}
-		
+
+		double goal_dist = metric_dist(goal_global_frame_vector.getX(), goal_global_frame_vector.getY());
+		if (goal_dist < goal_threshold_) {
+			geometry_msgs::PoseStamped current_pose;
+			if (!costmap_->getRobotPose(current_pose)) {
+				ROS_ERROR("RLLocalPlanner could not get robot pose");
+				return false;
+			}
+			if (latched_stop_rotate_controller_.isGoalReached(&planner_util_, odom_helper_, current_pose)) {
+				ROS_INFO("RLLocalPlanner has reached the goal!");
+				return true;
+			}
+			return false;
+		}
 		return false;
 
   	} //isGoalReached
@@ -145,10 +188,37 @@ namespace rl_local_planner {
 			ROS_ERROR("Failed set path on waypoint generator.");
  			return false;
 		}
+		// when we get a new plan, we also want to clear any latch we may have on goal tolerances
+		latched_stop_rotate_controller_.resetLatching();
+		planner_util_.setPlan(orig_plan);
 		return true;
   	} //setPlan
 
 	bool RLLocalPlanner::computeVelocityCommands(geometry_msgs::Twist& cmd_vel){
+		geometry_msgs::PoseStamped current_pose;
+		if (!costmap_->getRobotPose(current_pose)) {
+			ROS_ERROR("RLLocalPlanner could not get robot pose");
+			return false;
+		}
+		// when the position is reached, the robot only needs to rotate
+		if (latched_stop_rotate_controller_.isPositionReached(&planner_util_, current_pose)) {
+			return latched_stop_rotate_controller_.computeVelocityCommandsStopRotate(
+				cmd_vel,
+				planner_util_.getCurrentLimits().getAccLimits(),
+				sim_period_,
+				&planner_util_,
+				odom_helper_,
+				current_pose,
+				std::bind(
+					&RLLocalPlanner::checkTrajectory,
+					this,
+					std::placeholders::_1,
+					std::placeholders::_2,
+					std::placeholders::_3
+				)
+			);
+		}
+
 		// ROS_WARN("Velocity command");
 		// Trigger agent to compute next action
 		std_msgs::Bool msg;
@@ -182,7 +252,35 @@ namespace rl_local_planner {
 		return true;
 
 	}//computeVelocityCommands
-	
+
+	bool RLLocalPlanner::checkTrajectory(
+		Eigen::Vector3f pos,
+		Eigen::Vector3f /*vel*/,
+		Eigen::Vector3f vel_samples
+	) {
+		base_local_planner::CostmapModel world_model(*costmap_->getCostmap());
+		auto footprint_spec = costmap_->getRobotFootprint();
+
+		// current pose
+		double cost_current = world_model.footprintCost(pos[0], pos[1], pos[2], footprint_spec);
+
+		// predicted pose
+		// NOTE: calculations based on base_local_planner::SimpleTrajectoryGenerator::computeNewPositions
+		double new_x = pos[0] + (vel_samples[0] * std::cos(pos[2]) + vel_samples[1] * std::cos(M_PI_2 + pos[2])) * sim_period_;
+		double new_y = pos[1] + (vel_samples[0] * std::sin(pos[2]) + vel_samples[1] * std::sin(M_PI_2 + pos[2])) * sim_period_;
+		double new_yaw = pos[2] + vel_samples[2] * sim_period_;
+		double cost_next = world_model.footprintCost(new_x, new_y, new_yaw, footprint_spec);
+
+		if (cost_current < 0 || cost_next < 0) {
+			return false;
+		}
+		double cost = std::max(cost_current, cost_next);
+		if (cost >= costmap_2d::INSCRIBED_INFLATED_OBSTACLE) {
+			return false;
+		}
+
+		return true;
+	}
 
 	double RLLocalPlanner::metric_dist(double x, double y){
 		double dist = sqrt(pow(x , 2) + pow(y , 2));

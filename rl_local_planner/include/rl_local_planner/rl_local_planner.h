@@ -15,6 +15,7 @@
 #include <std_msgs/Bool.h>
 #include <geometry_msgs/Twist.h>
 #include <rl_msgs/SetPath.h>
+#include <base_local_planner/latched_stop_rotate_controller.h>
 
 
 namespace rl_local_planner {
@@ -62,6 +63,9 @@ namespace rl_local_planner {
        * @return >0 if a valid velocity command was found, otherwise a result <0, contains the fail_code
        */
       bool computeVelocityCommands(geometry_msgs::Twist& cmd_vel);
+
+      /// Stop and rotate controller uses this to validate commands
+      bool checkTrajectory(Eigen::Vector3f pos, Eigen::Vector3f vel, Eigen::Vector3f vel_samples);
     protected:
       ros::NodeHandle nh_;
     private:
@@ -76,6 +80,15 @@ namespace rl_local_planner {
       bool is_action_new_;                                    // True, if new action is available
       int rl_mode_;                                           // mode of rl_agent
       bool done_;                                             // True, if the rl_agent is done
+
+      /// Adjusts the mobile base orientation once the goal position has been reached
+      base_local_planner::LatchedStopRotateController latched_stop_rotate_controller_;
+      /// Required by the LatchedStopRotateController
+      base_local_planner::LocalPlannerUtil planner_util_;
+      /// Required by the LatchedStopRotateController
+      base_local_planner::OdometryHelperRos odom_helper_;
+      /// The period at which the local planner is expected to run
+      double sim_period_;
 
       // Services
       ros::ServiceClient rl_agent_;
